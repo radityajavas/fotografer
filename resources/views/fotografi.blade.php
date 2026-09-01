@@ -29,29 +29,36 @@
 </head>
 <body class="bg-cream-100 text-darkness font-sans antialiased">
 
-    <!-- NAVBAR -->
-    <header class="bg-cream-100 border-b border-cream-300/50 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-2 font-bold text-xl tracking-wide">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <circle cx="12" cy="13" r="3" stroke-width="2" />
-                </svg>
-                <span>Lensa Abadi</span>
-            </div>
-            
-            <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
-                <a href="#home" class="hover:text-sage-600 transition">Home</a>
-                <a href="#services" class="hover:text-sage-600 transition">Services</a>
-                <a href="#portfolio" class="hover:text-sage-600 transition">Portfolio</a>
-                <a href="#contact" class="hover:text-sage-600 transition">Contact</a>
-            </nav>
+ <!-- NAVBAR -->
+<header class="bg-cream-100 border-b border-cream-300/50 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-2 font-bold text-xl tracking-wide">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sage-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h0.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <circle cx="12" cy="13" r="3" stroke-width="2" />
+            </svg>
+            <span>Lensa Abadi</span>
+        </div>
+        
+        <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
+            <a href="#home" class="hover:text-sage-600 transition">Home</a>
+            <a href="#services" class="hover:text-sage-600 transition">Services</a>
+            <a href="#portfolio" class="hover:text-sage-600 transition">Portfolio</a>
+            <a href="#contact" class="hover:text-sage-600 transition">Contact</a>
+        </nav>
 
+        <!-- CONTAINER UNTUK DUA TOMBOL TANPA MERUBAH BENTUK -->
+        <div class="flex items-center space-x-1">
             <a href="#contact" class="bg-sage-500 hover:bg-sage-600 text-white text-xs px-5 py-2.5 rounded-full font-medium transition shadow-sm">
                 Book Now
             </a>
+            <a href="#contact" class="bg-sage-500 hover:bg-sage-600 text-white text-xs px-5 py-2.5 rounded-full font-medium transition shadow-sm">
+                Register/Login
+            </a>
         </div>
-    </header>
+
+    </div>
+</header>
 
     <!-- HERO SECTION -->
     <section id="home" class="max-w-6xl mx-auto px-6 py-12 md:py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
