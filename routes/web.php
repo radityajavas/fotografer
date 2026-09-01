@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PhotographerController; 
+use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\Admin\PackageController;
 
 Route::get('/', function () {
