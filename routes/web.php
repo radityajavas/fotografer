@@ -21,3 +21,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route CRUD Paket Foto
     Route::resource('packages', PackageController::class)->except(['create', 'edit', 'show']);
 });
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
