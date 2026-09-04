@@ -12,7 +12,6 @@
                     <li class="list-group-item"><b>Paket Foto: </b>{{ $booking->package->name ?? '-' }}</li>
                     <li class="list-group-item"><b>Tanggal Booking: </b>{{ $booking->tanggal_booking }}</li>
                     <li class="list-group-item"><b>Alamat Foto: </b>{{ $booking->alamat }}</li>
-                    <li class="list-group-item"><b>Status: </b>{{ $booking->status }}</li>
                 </ul>
             </div>
             <a class="btn btn-success mt-3" href="{{ route('booking.index') }}">Kembali</a>

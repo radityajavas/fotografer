@@ -47,7 +47,7 @@
                         <select name="photographer_id" class="form-control" id="photographer_id" required>
                             <option value="">-- Pilih Fotografer --</option>
                             @foreach ($photographers as $fg)
-                                <option value="{{ $fg->id }}">{{ $fg->name }} ({{ $fg->specialization }})</option>
+                                <option value="{{ $fg->id_photographer ?? $fg->id }}">{{ $fg->name }} ({{ $fg->specialization }})</option>
                             @endforeach
                         </select>
                     </div>
@@ -58,7 +58,7 @@
                         <select name="package_id" class="form-control" id="package_id" required>
                             <option value="">-- Pilih Paket Foto --</option>
                             @foreach ($packages as $pkt)
-                                <option value="{{ $pkt->id }}">{{ $pkt->name }} - Rp {{ number_format($pkt->price, 0, ',', '.') }}</option>
+                                <option value="{{ $pkt->id_package ?? $pkt->id }}">{{ $pkt->name }} - Rp {{ number_format($pkt->price, 0, ',', '.') }}</option>
                             @endforeach
                         </select>
                     </div>

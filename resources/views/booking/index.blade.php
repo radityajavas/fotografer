@@ -26,7 +26,6 @@
         <th>Paket Foto</th>
         <th>Tanggal Booking</th>
         <th>Alamat</th>
-        <th>Status</th>
         <th width="280px">Action</th>
     </tr>
     @foreach ($booking as $index => $b)
@@ -37,7 +36,6 @@
         <td>{{ $b->package->name ?? '-' }}</td>
         <td>{{ $b->tanggal_booking }}</td>
         <td>{{ $b->alamat }}</td>
-        <td><span class="badge badge-info">{{ $b->status }}</span></td>
         <td>
             <form action="{{ route('booking.destroy', $b->id_booking) }}" method="POST">
                 <a class="btn btn-info" href="{{ route('booking.show', $b->id_booking) }}">Show</a>

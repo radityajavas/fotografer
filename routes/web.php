@@ -32,3 +32,7 @@ Route::resource('admin/photographers', PhotographerController::class)->names('ad
 // Route Auth & Home
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// Route Panel Admin (Kelola Status Booking)
+Route::get('/admin/bookings', [BookingController::class, 'adminIndex'])->name('admin.bookings.index');
+Route::patch('/admin/bookings/{id}/status', [BookingController::class, 'updateStatus'])->name('admin.bookings.updateStatus');

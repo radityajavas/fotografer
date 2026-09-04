@@ -27,7 +27,7 @@
                         <label for="photographer_id">Fotografer</label>
                         <select name="photographer_id" class="form-control" id="photographer_id">
                             @foreach ($photographers as $fg)
-                                <option value="{{ $fg->id }}" {{ $booking->photographer_id == $fg->id ? 'selected' : '' }}>
+                                <option value="{{ $fg->id_photographer ?? $fg->id }}" {{ $booking->photographer_id == ($fg->id_photographer ?? $fg->id) ? 'selected' : '' }}>
                                     {{ $fg->name }} ({{ $fg->specialization }})
                                 </option>
                             @endforeach
@@ -37,7 +37,7 @@
                         <label for="package_id">Paket Foto</label>
                         <select name="package_id" class="form-control" id="package_id">
                             @foreach ($packages as $pkt)
-                                <option value="{{ $pkt->id }}" {{ $booking->package_id == $pkt->id ? 'selected' : '' }}>
+                                <option value="{{ $pkt->id_package ?? $pkt->id }}" {{ $booking->package_id == ($pkt->id_package ?? $pkt->id) ? 'selected' : '' }}>
                                     {{ $pkt->name }} - Rp {{ number_format($pkt->price, 0, ',', '.') }}
                                 </option>
                             @endforeach
@@ -51,11 +51,7 @@
                         <label for="alamat">Alamat Lokasi Foto</label>
                         <textarea name="alamat" class="form-control" id="alamat" rows="2">{{ $booking->alamat }}</textarea>
                     </div>
-                    <!-- Input Status (Readonly / Kunci) -->
-                    <div class="form-group">
-                    <label for="status">Status Booking</label>
-                    <input type="text" name="status" class="form-control" value="{{ $booking->status }}" readonly>
-                    </div>
+
                     <button type="submit" class="btn btn-primary">Submit</button>
                     <a class="btn btn-success" href="{{ route('booking.index') }}">Kembali</a>
                 </form>
