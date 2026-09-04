@@ -86,8 +86,7 @@
 <!-- JS Flatpickr -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    // Ambil array tanggal terbooking dari Controller (Format mudah & tanpa error merah)
-    const bookedDates = JSON.parse('<?php echo json_encode($bookedDates); ?>');
+    const bookedDates = JSON.parse('<?php /** @var array $bookedDates */ echo json_encode($bookedDates); ?>');
 
     // Jalankan plugin kalender Flatpickr
     flatpickr("#tanggal_booking", {
