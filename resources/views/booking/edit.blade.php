@@ -51,9 +51,10 @@
                         <label for="alamat">Alamat Lokasi Foto</label>
                         <textarea name="alamat" class="form-control" id="alamat" rows="2">{{ $booking->alamat }}</textarea>
                     </div>
+                    <!-- Input Status (Readonly / Kunci) -->
                     <div class="form-group">
-                        <label for="status">Status</label>
-                        <input type="text" name="status" class="form-control" id="status" value="{{ $booking->status }}">
+                    <label for="status">Status Booking</label>
+                    <input type="text" name="status" class="form-control" value="{{ $booking->status }}" readonly>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                     <a class="btn btn-success" href="{{ route('booking.index') }}">Kembali</a>
