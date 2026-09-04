@@ -26,6 +26,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::resource('pelanggan', PelangganController::class);
 Route::resource('booking', BookingController::class);
 
+Route::resource('admin/packages', PackageController::class)->names('admin.packages');
+Route::resource('admin/photographers', PhotographerController::class)->names('admin.photographers');
+
 // Route Auth & Home
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

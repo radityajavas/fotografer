@@ -9,8 +9,8 @@
     @endif
 
     <!-- Form Tambah Paket -->
-    <div class="card mb-4">
-        <div class="card-header">Tambah Paket Foto Baru</div>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">Tambah Paket Foto Baru</div>
         <div class="card-body">
             <form action="{{ route('admin.packages.store') }}" method="POST">
                 @csrf
@@ -34,39 +34,44 @@
     </div>
 
     <!-- Tabel Data Paket -->
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Paket</th>
-                <th>Harga</th>
-                <th>Durasi</th>
-                <th>Deskripsi</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($packages as $index => $item)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $item->name }}</td>
-                <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                <td>{{ $item->duration_hours }} Jam</td>
-                <td>{{ $item->description }}</td>
-                <td>
-                    <form action="{{ route('admin.packages.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="6" class="text-center">Belum ada data paket foto.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th width="50">No</th>
+                    <th>Nama Paket</th>
+                    <th>Harga</th>
+                    <th>Durasi</th>
+                    <th>Deskripsi</th>
+                    <th width="150">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($packages as $index => $item)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $item->name }}</td>
+                    <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                    <td>{{ $item->duration_hours }} Jam</td>
+                    <td>{{ $item->description }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ route('admin.packages.edit', $item->id) }}" class="btn btn-warning btn-sm text-white">Edit</a>
+                            <form action="{{ route('admin.packages.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Belum ada data paket foto.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 @endsection

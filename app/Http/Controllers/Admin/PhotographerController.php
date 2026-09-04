@@ -16,34 +16,45 @@ class PhotographerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+        $validated = $request->validate([
+            'name'           => 'required|string|max:255',
+            'phone'          => 'required|string|max:50',
             'specialization' => 'required|string|max:255',
+            'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
         ]);
 
-        Photographer::create($request->all());
+        Photographer::create($validated);
 
         return redirect()->back()->with('success', 'Data fotografer berhasil ditambahkan!');
     }
 
-    public function update(Request $request, Photographer $photographer)
+    public function edit($id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'specialization' => 'required|string|max:255',
-            'status' => 'required|in:available,busy',
-        ]);
-
-        $photographer->update($request->all());
-
-        return redirect()->back()->with('success', 'Data fotografer berhasil diperbarui!');
+        $photographer = Photographer::findOrFail($id);
+        return view('admin.photographers.edit', compact('photographer'));
     }
 
-    public function destroy(Photographer $photographer)
+    public function update(Request $request, $id)
     {
+        // Validasi disesuaikan: phone dibatasi hingga 50 karakter agar angka panjang tidak ditolak
+        $validated = $request->validate([
+            'name'           => 'required|string|max:255',
+            'phone'          => 'required|string|max:50',
+            'specialization' => 'required|string|max:255',
+            'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
+        ]);
+
+        $photographer = Photographer::findOrFail($id);
+        $photographer->update($validated);
+
+        return redirect()->route('admin.photographers.index')->with('success', 'Data fotografer berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $photographer = Photographer::findOrFail($id);
         $photographer->delete();
+
         return redirect()->back()->with('success', 'Data fotografer berhasil dihapus!');
     }
 }
