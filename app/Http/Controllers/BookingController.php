@@ -4,82 +4,64 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Photographer;
-use App\Models\Package;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    public function index()
+    // ... method kamu yang sudah ada (seperti index, store, dll) ...
+
+    /**
+     * Menampilkan daftar booking & statistik di Panel Admin
+     */
+    public function adminIndex(Request $request)
     {
-        $booking = Booking::with(['photographer', 'package'])->paginate(5);
-        return view('booking.index', compact('booking'));
+        $statusFilter = $request->query('status');
+
+        $query = Booking::with(['photographer', 'package', 'user']);
+
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+
+        $bookings = $query->latest()->paginate(10);
+
+        // Ringkasan Statistik Laporan
+        $stats = [
+            'total_booking' => Booking::count(),
+            'pending' => Booking::where('status', 'menunggu')->count(),
+            'approved' => Booking::where('status', 'diterima')->count(),
+            'rejected' => Booking::where('status', 'ditolak')->count(),
+            'total_pendapatan' => Booking::where('status', 'diterima')->sum('total_harga')
+        ];
+
+        return view('admin.bookings.index', compact('bookings', 'stats'));
     }
 
-    public function create()
+    /**
+     * Memperbarui status booking (Setujui / Tolak)
+     */
+    public function updateStatus(Request $request, $id)
     {
-        $photographers = Photographer::all();
-        $packages = Package::all();
-        
-        // Ambil daftar tanggal yang sudah dibooking & format ke Y-m-d
-        $bookedDates = Booking::pluck('tanggal_booking')
-            ->map(function ($date) {
-                return date('Y-m-d', strtotime($date));
-            })
-            ->toArray();
-
-        return view('booking.create', compact('photographers', 'packages', 'bookedDates'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nama_pelanggan'  => 'required|string|max:255',
-            'photographer_id' => 'required',
-            'package_id'      => 'required',
-            'tanggal_booking' => 'required|date',
-            'alamat'          => 'required|string',
+        $request->validate([
+            'status' => 'required|in:menunggu,diterima,ditolak'
         ]);
 
-        Booking::create($validated);
+        $booking = Booking::findOrFail($id);
+        $booking->status = $request->status;
+        $booking->save();
 
-        return redirect()->route('booking.index')
-                         ->with('success', 'Data booking berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Status booking berhasil diperbarui.');
     }
 
-    public function show(Booking $booking)
+    /**
+     * Kelola Jadwal Agenda Fotografer
+     */
+    public function schedule()
     {
-        return view('booking.detail', compact('booking'));
-    }
+        $photographers = Photographer::with(['bookings' => function($q) {
+            $q->where('status', 'diterima');
+        }])->get();
 
-    public function edit(Booking $booking)
-    {
-        $photographers = Photographer::all();
-        $packages = Package::all();
-
-        return view('booking.edit', compact('booking', 'photographers', 'packages'));
-    }
-
-    public function update(Request $request, Booking $booking)
-    {
-        $validated = $request->validate([
-            'nama_pelanggan'  => 'required|string|max:255',
-            'photographer_id' => 'required',
-            'package_id'      => 'required',
-            'tanggal_booking' => 'required|date',
-            'alamat'          => 'required|string',
-        ]);
-
-        $booking->update($validated);
-
-        return redirect()->route('booking.index')
-                         ->with('success', 'Data booking berhasil diperbarui.');
-    }
-
-    public function destroy(Booking $booking)
-    {
-        $booking->delete();
-
-        return redirect()->route('booking.index')
-                         ->with('success', 'Data booking berhasil dihapus.');
+        return view('admin.schedule.index', compact('photographers'));
     }
 }

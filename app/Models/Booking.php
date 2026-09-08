@@ -9,25 +9,23 @@ class Booking extends Model
 {
     use HasFactory;
 
-    protected $table = 'booking';
-    protected $primaryKey = 'id_booking';
+    protected $guarded = ['id'];
 
-    protected $fillable = [
-        'nama_pelanggan',
-        'photographer_id',
-        'package_id',
-        'tanggal_booking',
-        'alamat',
-        'status',
-    ];
-
-    public function photographer()
+    // Relasi ke Model User (Pemesan)
+    public function user()
     {
-        return $this->belongsTo(\App\Models\Photographer::class, 'photographer_id');
+        return $this->belongsTo(User::class);
     }
 
+    // Relasi ke Model Photographer
+    public function photographer()
+    {
+        return $this->belongsTo(Photographer::class);
+    }
+
+    // Relasi ke Model Package
     public function package()
     {
-        return $this->belongsTo(\App\Models\Package::class, 'package_id');
+        return $this->belongsTo(Package::class);
     }
 }
