@@ -36,3 +36,13 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 // Route Panel Admin (Kelola Status Booking)
 Route::get('/admin/bookings', [BookingController::class, 'adminIndex'])->name('admin.bookings.index');
 Route::patch('/admin/bookings/{id}/status', [BookingController::class, 'updateStatus'])->name('admin.bookings.updateStatus');
+
+// Route untuk Halaman Utama (Landing Page)
+Route::get('/', function () {
+    return view('landing');
+});
+
+// Route untuk Halaman Detail Fotografer (Uji Coba Visual)
+Route::get('/photographer/detail', function () {
+    return view('photographers.show');
+});
