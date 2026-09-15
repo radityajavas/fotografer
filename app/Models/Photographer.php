@@ -9,10 +9,11 @@ class Photographer extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'phone',
-        'specialization',
-        'status',
-    ];
+    protected $guarded = [];
+
+    // Tambahkan method relasi ini
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }
