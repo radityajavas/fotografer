@@ -2,66 +2,112 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
-use App\Models\Photographer;
 use Illuminate\Http\Request;
+use App\Models\Photographer;
+use App\Models\Package;
+use App\Models\Booking;
 
 class BookingController extends Controller
 {
-    // ... method kamu yang sudah ada (seperti index, store, dll) ...
+    // ==========================================
+    // 1. FITUR PELANGGAN (CUSTOMER)
+    // ==========================================
 
-    /**
-     * Menampilkan daftar booking & statistik di Panel Admin
-     */
-    public function adminIndex(Request $request)
+    // Menampilkan Form Booking
+    public function create(Request $request)
     {
-        $statusFilter = $request->query('status');
+        $photographerId = $request->query('photographer_id');
+        $selectedPhotographer = Photographer::find($photographerId);
+        $packages = Package::all();
 
-        $query = Booking::with(['photographer', 'package', 'user']);
+        return view('booking.create', compact('selectedPhotographer', 'packages'));
+    }
 
-        if ($statusFilter) {
-            $query->where('status', $statusFilter);
-        }
+    // Memproses Simpan Booking
+    public function store(Request $request)
+    {
+        $request->validate([
+            'photographer_id' => 'required|exists:photographers,id',
+            'package_id'      => 'required',
+            'booking_date'    => 'required|date',
+        ]);
 
-        $bookings = $query->latest()->paginate(10);
+        Booking::create([
+            'user_id'         => auth()->id(),
+            'photographer_id' => $request->photographer_id,
+            'package_id'      => $request->package_id,
+            'booking_date'    => $request->booking_date,
+            'status'          => 'pending',
+        ]);
 
-        // Ringkasan Statistik Laporan
+        return redirect()->route('home')->with('success', 'Pemesanan berhasil dibuat!');
+    }
+
+    // ==========================================
+    // 2. FITUR ADMIN
+    // ==========================================
+
+    // Menampilkan Daftar Booking di Halaman Admin
+    public function adminIndex()
+    {
+        $bookings = Booking::with(['user', 'photographer', 'package'])->latest()->get();
+
+        // Menghitung total pendapatan dari booking status approved atau completed
+        $totalPendapatan = $bookings->filter(function ($booking) {
+            return in_array($booking->status, ['approved', 'completed']);
+        })->sum(function ($booking) {
+            return $booking->package ? $booking->package->price : 0;
+        });
+
+        // Variabel $stats lengkap sesuai kebutuhan view blade admin
         $stats = [
-            'total_booking' => Booking::count(),
-            'pending' => Booking::where('status', 'menunggu')->count(),
-            'approved' => Booking::where('status', 'diterima')->count(),
-            'rejected' => Booking::where('status', 'ditolak')->count(),
-            'total_pendapatan' => Booking::where('status', 'diterima')->sum('total_harga')
+            'total_booking'    => $bookings->count(),
+            'pending'          => $bookings->where('status', 'pending')->count(),
+            'approved'         => $bookings->where('status', 'approved')->count(),
+            'completed'        => $bookings->where('status', 'completed')->count(),
+            'total_pendapatan' => $totalPendapatan,
         ];
 
         return view('admin.bookings.index', compact('bookings', 'stats'));
     }
 
-    /**
-     * Memperbarui status booking (Setujui / Tolak)
-     */
+    // Mengubah Status Booking (Approve/Reject/Complete)
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:menunggu,diterima,ditolak'
+            'status' => 'required|string',
         ]);
 
         $booking = Booking::findOrFail($id);
-        $booking->status = $request->status;
-        $booking->save();
+        $booking->update([
+            'status' => $request->status,
+        ]);
 
-        return redirect()->back()->with('success', 'Status booking berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Status booking berhasil diperbarui!');
     }
 
-    /**
-     * Kelola Jadwal Agenda Fotografer
-     */
+    // Menampilkan Jadwal Pemotretan Fotografer
     public function schedule()
     {
-        $photographers = Photographer::with(['bookings' => function($q) {
-            $q->where('status', 'diterima');
+        $photographers = Photographer::with(['bookings' => function($query) {
+            $query->whereIn('status', ['approved', 'completed'])->orderBy('booking_date', 'asc');
         }])->get();
 
-        return view('admin.schedule.index', compact('photographers'));
+        $schedules = Booking::with(['photographer', 'user'])
+            ->whereIn('status', ['approved', 'completed'])
+            ->orderBy('booking_date', 'asc')
+            ->get();
+
+        return view('admin.schedule.index', compact('schedules', 'photographers'));
     }
-} 
+    // Menampilkan daftar pesanan milik pengguna yang sedang login
+public function myBookings()
+{
+    $bookings = Booking::with(['photographer', 'package'])
+        ->where('user_id', auth()->id())
+        ->latest()
+        ->get();
+
+    return view('booking.my_bookings', compact('bookings'));
+}
+}
