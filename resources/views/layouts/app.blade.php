@@ -27,21 +27,54 @@
                     <a href="{{ route('bookings.my') }}" class="text-gray-700 hover:text-indigo-600 font-medium"> Pesanan Saya </a>
 
                     {{-- Admin Links --}}
-                    @auth
-                        @if(auth()->user()->role === 'admin')
-                            <div class="h-4 w-[1px] bg-gray-200 my-auto"></div>
-                            <a href="{{ route('admin.dashboard') }}"
-                                class="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">Dashboard
-                                Admin</a>
-                            <a href="{{ route('admin.photographers.index') }}"
-                                class="hover:text-indigo-600 transition">Fotografer</a>
-                            <a href="{{ route('admin.packages.index') }}" class="hover:text-indigo-600 transition">Paket</a>
-                            <a href="{{ route('admin.bookings.index') }}" class="hover:text-indigo-600 transition">Booking</a>
-                            <a href="{{ route('admin.schedule.index') }}" class="hover:text-indigo-600 transition">Jadwal</a>
-                        @endif
-                    @endauth
+                @auth
+    @if(auth()->user()->role === 'admin')
+        <!-- Dropdown Admin (Tailwind CSS) -->
+        <div class="relative group inline-block text-left">
+            <!-- Tombol Utama -->
+            <button type="button" 
+                    class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition duration-150 ease-in-out border border-slate-700 shadow-sm focus:outline-none">
+                <span>Panel Administrasi</span>
+                <svg class="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <!-- Isi Dropdown -->
+            <div class="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                <!-- Group 1: Master Data -->
+                <div class="p-2 border-b border-gray-100">
+                    <span class="block px-3 py-1 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                        Master Data
+                    </span>
+                    <a href="{{ route('admin.photographers.index') }}" 
+                       class="block px-3 py-2 text-xs font-medium text-gray-700 hover:bg-slate-50 hover:text-slate-900 rounded-md transition-colors">
+                        Manajemen Fotografer
+                    </a>
+                    <a href="{{ route('admin.packages.index') }}" 
+                       class="block px-3 py-2 text-xs font-medium text-gray-700 hover:bg-slate-50 hover:text-slate-900 rounded-md transition-colors">
+                        Kelola Paket Layanan
+                    </a>
+                </div>
+
+                <!-- Group 2: Transaksi & Jadwal -->
+                <div class="p-2">
+                    <span class="block px-3 py-1 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                        Transaksi & Agenda
+                    </span>
+                    <a href="{{ route('admin.bookings.index') }}" 
+                       class="block px-3 py-2 text-xs font-medium text-gray-700 hover:bg-slate-50 hover:text-slate-900 rounded-md transition-colors">
+                        Data Pemesanan (Booking)
+                    </a>
+                    <a href="{{ route('admin.schedule.index') }}" 
+                       class="block px-3 py-2 text-xs font-medium text-gray-700 hover:bg-slate-50 hover:text-slate-900 rounded-md transition-colors">
+                        Jadwal Agenda Pemotretan
+                    </a>
                 </div>
             </div>
+        </div>
+    @endif
+@endauth
 
             <!-- Right Profile / Auth -->
             <div class="flex items-center space-x-4">
