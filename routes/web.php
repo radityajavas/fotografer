@@ -12,6 +12,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ChatController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes - Cocofonder
@@ -60,3 +61,5 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('bookings.my');
 });
+Route::get('/fotografer/cari', [PhotographerController::class, 'cari'])
+    ->name('fotografer.cari');
