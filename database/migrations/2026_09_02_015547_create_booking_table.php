@@ -15,7 +15,7 @@ class CreateBookingTable extends Migration
             $table->unsignedBigInteger('package_id');
             $table->date('tanggal_booking');
             $table->text('alamat');
-            $table->string('status', 20)->default('Pending');
+            $table->string('status', 20)->default('pending');
             $table->timestamps();
         });
     }
