@@ -30,6 +30,7 @@ class BookingController extends Controller
             'photographer_id' => 'required|exists:photographers,id',
             'package_id'      => 'required',
             'booking_date'    => 'required|date',
+            'lokasi'          => 'required|string|max:500',
         ]);
 
         Booking::create([
@@ -37,6 +38,7 @@ class BookingController extends Controller
             'photographer_id' => $request->photographer_id,
             'package_id'      => $request->package_id,
             'booking_date'    => $request->booking_date,
+            'lokasi'          => $request->lokasi,
             'status'          => 'pending',
         ]);
 
