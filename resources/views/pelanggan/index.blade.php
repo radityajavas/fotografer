@@ -1,52 +1,49 @@
-@extends('pelanggan.layout')
+@extends('layouts.admin')
+
+@section('title', 'Data Pelanggan')
 
 @section('content')
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left mt-2">
-            <h2>DATA PELANGGAN</h2>
+<div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h3 class="text-lg font-bold text-gray-800">Daftar Pelanggan</h3>
+            <p class="text-xs text-gray-500 mt-1">Kelola data pelanggan yang terdaftar di platform Cocofonder.</p>
         </div>
-        <div class="float-right my-2">
-            <a class="btn btn-success" href="{{ route('pelanggan.create') }}"> Input Pelanggan</a>
-        </div>
+        <a href="#" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition inline-flex items-center gap-1.5 shadow-sm">
+            <span>+</span> Input Pelanggan
+        </a>
     </div>
-</div>
 
-@if ($message = Session::get('success'))
-    <div class="alert alert-success">
-        <p>{{ $message }}</p>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-600 font-semibold text-xs uppercase">
+                <tr>
+                    <th class="p-4 rounded-l-xl">Nama</th>
+                    <th class="p-4">Email</th>
+                    <th class="p-4">No HP</th>
+                    <th class="p-4">Alamat</th>
+                    <th class="p-4 text-center rounded-r-xl">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-gray-700">
+                @forelse($pelanggan ?? [] as $item)
+                <tr class="hover:bg-gray-50/80 transition">
+                    <td class="p-4 font-semibold text-gray-800">{{ $item->nama ?? $item->name }}</td>
+                    <td class="p-4 text-gray-600">{{ $item->email }}</td>
+                    <td class="p-4 text-gray-600">{{ $item->no_hp ?? '-' }}</td>
+                    <td class="p-4 text-gray-500">{{ $item->alamat ?? '-' }}</td>
+                    <td class="p-4 text-center space-x-1">
+                        <button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">Edit</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">Hapus</button>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="p-8 text-center text-gray-400">Belum ada data pelanggan.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-@endif
-
-<table class="table table-bordered">
-    <tr>
-        <th>Nama</th>
-        <th>Email</th>
-        <th>No HP</th>
-        <th>Alamat</th>
-        <th width="280px">Action</th>
-    </tr>
-    @foreach ($pelanggan as $p)
-    <tr>
-        <td>{{ $p->nama }}</td>
-        <td>{{ $p->email }}</td>
-        <td>{{ $p->no_hp }}</td>
-        <td>{{ $p->alamat }}</td>
-        <td>
-            <form action="{{ route('pelanggan.destroy', $p->id_pelanggan) }}" method="POST">
-                <a class="btn btn-info" href="{{ route('pelanggan.show', $p->id_pelanggan) }}">Show</a>
-                <a class="btn btn-primary" href="{{ route('pelanggan.edit', $p->id_pelanggan) }}">Edit</a>
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger">Delete</button>
-            </form>
-        </td>
-    </tr>
-    @endforeach
-</table>
-
-{{-- Link Pagination Modul 7 --}}
-<div class="d-flex justify-content-center">
-    {!! $pelanggan->links() !!}
 </div>
 @endsection

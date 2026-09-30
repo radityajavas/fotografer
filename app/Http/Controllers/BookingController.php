@@ -45,28 +45,39 @@ class BookingController extends Controller
         return redirect()->route('home')->with('success', 'Pemesanan berhasil dibuat!');
     }
 
+    // Menampilkan daftar pesanan milik pengguna yang sedang login
+    public function myBookings()
+    {
+        $bookings = Booking::with(['photographer', 'package'])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        return view('booking.my_bookings', compact('bookings'));
+    }
+
     // ==========================================
     // 2. FITUR ADMIN
     // ==========================================
 
-    // Menampilkan Daftar Booking di Halaman Admin
+    // Menampilkan Daftar Booking & Statistik di Halaman Admin
     public function adminIndex()
     {
         $bookings = Booking::with(['user', 'photographer', 'package'])->latest()->get();
 
-        // Menghitung total pendapatan dari booking status approved atau completed
+        // Menhitung total pendapatan dari booking status approved atau completed
         $totalPendapatan = $bookings->filter(function ($booking) {
-            return in_array($booking->status, ['approved', 'completed']);
+            return in_array(strtolower($booking->status), ['approved', 'diterima', 'completed']);
         })->sum(function ($booking) {
-            return $booking->package ? $booking->package->price : 0;
+            return $booking->package ? $booking->package->price : ($booking->total_harga ?? 0);
         });
 
         // Variabel $stats lengkap sesuai kebutuhan view blade admin
         $stats = [
             'total_booking'    => $bookings->count(),
-            'pending'          => $bookings->where('status', 'pending')->count(),
-            'approved'         => $bookings->where('status', 'approved')->count(),
-            'completed'        => $bookings->where('status', 'completed')->count(),
+            'pending'          => $bookings->filter(fn($b) => in_array(strtolower($b->status), ['pending', 'menunggu']))->count(),
+            'approved'         => $bookings->filter(fn($b) => in_array(strtolower($b->status), ['approved', 'diterima']))->count(),
+            'completed'        => $bookings->filter(fn($b) => strtolower($b->status) == 'completed')->count(),
             'total_pendapatan' => $totalPendapatan,
         ];
 
@@ -92,24 +103,14 @@ class BookingController extends Controller
     public function schedule()
     {
         $photographers = Photographer::with(['bookings' => function($query) {
-            $query->whereIn('status', ['approved', 'completed'])->orderBy('booking_date', 'asc');
+            $query->whereIn('status', ['approved', 'completed', 'Diterima'])->orderBy('booking_date', 'asc');
         }])->get();
 
         $schedules = Booking::with(['photographer', 'user'])
-            ->whereIn('status', ['approved', 'completed'])
+            ->whereIn('status', ['approved', 'completed', 'Diterima'])
             ->orderBy('booking_date', 'asc')
             ->get();
 
         return view('admin.schedule.index', compact('schedules', 'photographers'));
     }
-    // Menampilkan daftar pesanan milik pengguna yang sedang login
-public function myBookings()
-{
-    $bookings = Booking::with(['photographer', 'package'])
-        ->where('user_id', auth()->id())
-        ->latest()
-        ->get();
-
-    return view('booking.my_bookings', compact('bookings'));
-}
 }
