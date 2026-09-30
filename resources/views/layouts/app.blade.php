@@ -1,68 +1,128 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cocofonder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand: #0f766e;
+            --brand-dark: #0b5a54;
+            --brand-soft: #e6f4f1;
+            --ink: #1c2321;
+        }
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #f6f7f6; color: var(--ink); }
+
+        /* Tombol */
+        .btn-brand {
+            background: var(--brand); color: #fff; border: 1px solid var(--brand);
+            font-weight: 600; transition: background .15s, transform .15s, box-shadow .15s;
+        }
+        .btn-brand:hover {
+            background: var(--brand-dark); border-color: var(--brand-dark); color: #fff;
+            transform: translateY(-1px); box-shadow: 0 4px 10px rgba(15,118,110,.3);
+        }
+        .btn-brand:active { transform: translateY(0); box-shadow: none; }
+        .btn-brand-outline {
+            background: transparent; color: var(--brand); border: 1.5px solid var(--brand);
+            font-weight: 600; transition: background .15s, color .15s;
+        }
+        .btn-brand-outline:hover { background: var(--brand); color: #fff; }
+
+        /* Header */
+        .site-nav { background: #fff; border-bottom: 1px solid #e3e7e5; }
+        .logo { display: inline-flex; align-items: center; gap: .55rem; text-decoration: none; color: var(--ink); font-size: 1.25rem; letter-spacing: -0.02em; }
+        .logo-icon { width: 2rem; height: 2rem; background: var(--brand); border-radius: .55rem; display: grid; place-items: center; }
+        .logo b { font-weight: 800; }
+        .logo span { font-weight: 400; color: var(--brand); }
+        .site-nav .nav-link { font-weight: 500; color: #4a5551; }
+        .site-nav .nav-link:hover { color: var(--brand); }
+
+        /* Bar pencarian terpadu */
+        .search-bar {
+            display: flex; align-items: stretch; background: #fff;
+            border: 1px solid #d5dbd8; border-radius: .75rem; overflow: hidden;
+        }
+        .search-bar:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(15,118,110,.15); }
+        .search-bar input, .search-bar select {
+            border: 0; outline: 0; background: transparent; padding: .8rem 1rem; font: inherit; font-size: .95rem;
+        }
+        .search-bar input { flex: 1 1 45%; min-width: 0; }
+        .search-bar select { flex: 1 1 30%; border-left: 1px solid #e3e7e5; }
+        .search-bar button { border-radius: 0; padding: 0 1.75rem; }
+        @media (max-width: 767px) {
+            .search-bar { flex-direction: column; }
+            .search-bar select { border-left: 0; border-top: 1px solid #e3e7e5; }
+            .search-bar button { padding: .8rem; }
+        }
+
+        /* Avatar, chip, rating */
+        .avatar { width: 2.6rem; height: 2.6rem; border-radius: 50%; object-fit: cover; flex: none; }
+        .avatar-fallback { background: var(--brand-soft); color: var(--brand); font-weight: 700; display: grid; place-items: center; text-transform: uppercase; font-size: .85rem; }
+        .chip { display: inline-block; background: #eef1ef; color: #45504c; font-size: .75rem; font-weight: 500; padding: .2rem .6rem; border-radius: 999px; margin: .1rem .15rem .1rem 0; }
+        .stars { color: #d99a1c; letter-spacing: 1px; white-space: nowrap; }
+        .stars .off { color: #d4d9d6; }
+
+        .table-wrap { background: #fff; border: 1px solid #e3e7e5; border-radius: .75rem; overflow: hidden; }
+        .table > :not(caption) > * > * { padding: .9rem 1rem; }
+        .table thead th { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: #6b7672; font-weight: 600; background: #fafbfa; }
+        .table-hover > tbody > tr:hover > * { background: var(--brand-soft); }
+
+        .site-footer { color: #7a8580; font-size: .8rem; }
+    </style>
 </head>
+<body>
 
-<body class="bg-gray-50 text-gray-800 antialiased">
+<nav class="navbar navbar-expand-md site-nav">
+    <div class="container">
+        <a class="logo" href="/">
+            <span class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                    <circle cx="12" cy="13" r="3.5"/>
+                </svg>
+            </span>
+            <div><b>Coco</b><span>fonder</span></div>
+        </a>
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="flex items-center space-x-8">
-                <!-- Logo -->
-                <a href="/" class="text-xl font-bold text-indigo-600 tracking-tight">Cocofonder.</a>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-md-4 me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('bookings.my') }}">Pesanan Saya</a></li>
+            </ul>
 
-                <!-- Navigation Links -->
-                <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600">
-                    <a href="/" class="hover:text-indigo-600 transition">Beranda</a>
-                    <a href="#" class="hover:text-indigo-600 transition">Cari Fotografer</a>
-                    <a href="#" class="hover:text-indigo-600 transition">Kategori</a>
-                    <a href="{{ route('bookings.my') }}" class="text-gray-700 hover:text-indigo-600 font-medium"> Pesanan Saya </a>
-
-            <!-- Right Profile / Auth -->
-            <div class="flex items-center space-x-4">
+            <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
                 @guest
-                    <a href="{{ route('login') }}"
-                        class="text-sm font-medium text-gray-600 hover:text-indigo-600 transition">Masuk</a>
-                    <a href="{{ route('register') }}"
-                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">Daftar</a>
+                    <a href="{{ route('login') }}" class="btn btn-brand-outline px-4">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-brand px-4">Daftar</a>
                 @else
-                    <div class="flex items-center space-x-3 text-sm">
-                        <span class="text-gray-500">Halo, <span
-                                class="font-semibold text-gray-800">{{ auth()->user()->name }}</span></span>
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit"
-                                class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition">
-                                Keluar
-                            </button>
-                        </form>
-                    </div>
+                    <span class="small fw-medium me-2">{{ auth()->user()->name }}</span>
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
+                        @csrf
+                        <button class="btn btn-brand-outline btn-sm px-3">Keluar</button>
+                    </form>
                 @endguest
             </div>
-
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- Main Content -->
-    <main>
-        @yield('content')
-    </main>
+<main class="container py-4 py-md-5">
+    @yield('content')
+</main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 mt-20 py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400">
-            &copy; 2026 Cocofonder.
-        </div>
-    </footer>
+<footer class="site-footer text-center pb-4">&copy; 2026 Cocofonder</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

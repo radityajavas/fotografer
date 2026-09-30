@@ -1,74 +1,80 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Photographer;
+use App\Models\User;
 
-// Import Controller
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ChatController;
 
-// Import Admin Controllers (Gunakan Alias AdminBookingController)
-use App\Http\Controllers\Admin\PhotographerController; 
+use App\Http\Controllers\Admin\PhotographerController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes - Cocofonder
-|--------------------------------------------------------------------------
-*/
-
-// 1. Auth Routes
+// 1. Auth
 Auth::routes();
 
-// 2. Public Routes
+// 2. Public
 Route::get('/', function () {
     $photographers = Photographer::all();
     return view('landing', compact('photographers'));
 })->name('landing');
 
+Route::get('/fotografer/cari', function (Request $request) {
+    $photographers = Photographer::query()
+        ->when($request->kategori, fn ($q, $v) => $q->where('specialization', 'like', "%{$v}%"))
+        ->get();
+
+    return view('landing', compact('photographers'));
+})->name('fotografer.cari');
+
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
-Route::get('/fotografer/cari', [PhotographerController::class, 'cari'])->name('fotografer.cari');
 
 Route::get('/photographer/detail', function () {
     return view('photographers.show');
 });
 
-// 3. Customer Routes
+// 3. Pelanggan
 Route::middleware(['auth'])->group(function () {
     Route::resource('booking', BookingController::class);
     Route::resource('pelanggan', PelangganController::class);
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('bookings.my');
 
-    // Chat Routes
     Route::get('/booking/{id}/chat', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/booking/{id}/chat', [ChatController::class, 'store'])->name('chat.store');
 });
 
-// 4. Admin Panel Routes (Disatukan dalam namespace/prefix Admin)
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard
+// 4. Admin (auth + admin)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Data Pelanggan
     Route::get('/customers', function () {
-        $pelanggan = \App\Models\User::where('role', 'customer')->get();
+        $pelanggan = User::where('role', 'customer')->latest()->get();
         return view('admin.customers', compact('pelanggan'));
     })->name('customers.index');
 
-    // Data Booking Khusus Admin
+    Route::delete('/customers/{id}', function ($id) {
+        User::where('role', 'customer')->findOrFail($id)->delete();
+        return redirect()->back()->with('success', 'Pelanggan berhasil dihapus!');
+    })->name('customers.destroy');
+
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::patch('/bookings/{id}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');
+    Route::delete('/bookings/{id}', [AdminBookingController::class, 'destroy'])->name('bookings.destroy');
 
-    // Master Data & Agenda
-    Route::resource('photographers', PhotographerController::class);
-    Route::resource('packages', PackageController::class);
-    Route::get('/schedule', [BookingController::class, 'schedule'])->name('schedule.index');
+    Route::get('/schedule', [AdminBookingController::class, 'schedule'])->name('schedule.index');
+
+    Route::resource('photographers', PhotographerController::class)
+        ->only(['index', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('packages', PackageController::class)
+        ->only(['index', 'store', 'edit', 'update', 'destroy']);
 });

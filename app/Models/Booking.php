@@ -11,19 +11,19 @@ class Booking extends Model
 
     protected $guarded = ['id'];
 
-    // Relasi ke Model User (Pemesan)
+    // Pemesan
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Model Photographer
+    // Fotografer
     public function photographer()
     {
         return $this->belongsTo(Photographer::class);
     }
 
-    // Relasi ke Model Package
+    // Paket foto
     public function package()
     {
         return $this->belongsTo(Package::class);

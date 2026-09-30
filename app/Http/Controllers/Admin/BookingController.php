@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Photographer;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -37,11 +38,29 @@ class BookingController extends Controller
             'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
-        $booking = Booking::findOrFail($id);
-        $booking->update([
+        Booking::findOrFail($id)->update([
             'status' => $request->status,
         ]);
 
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        Booking::findOrFail($id)->delete();
+
+        return redirect()->back()->with('success', 'Pemesanan berhasil dihapus!');
+    }
+
+    public function schedule()
+    {
+        $photographers = Photographer::with(['bookings' => function ($q) {
+            $q->with(['user', 'package'])
+              ->whereIn('status', ['pending', 'confirmed'])
+              ->whereDate('booking_date', '>=', today())
+              ->orderBy('booking_date');
+        }])->get();
+
+        return view('admin.schedule.index', compact('photographers'));
     }
 }

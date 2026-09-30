@@ -1,11 +1,13 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+:root {
+  --brand: #111111;        /* tombol & aksen (dulu ungu) */
+  --brand-dark: #000000;   /* hover */
+  --hero-bg: #111111;      /* latar hero (dulu ungu tua) */
+  --hero-text: #ffffff;
+  --surface: #ffffff;
+  --muted: #6b7280;
 }
+
+.btn-primary, .btn-daftar { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn-primary:hover, .btn-daftar:hover { background: var(--brand-dark); }
+.hero { background: var(--hero-bg); color: var(--hero-text); }
+.navbar-brand, a.active { color: var(--brand); }
