@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ChatController;
 
@@ -28,7 +29,7 @@ Route::get('/', function () {
 
 Route::get('/fotografer/cari', function (Request $request) {
     $photographers = Photographer::query()
-        ->when($request->kategori, fn ($q, $v) => $q->where('specialization', 'like', "%{$v}%"))
+        ->when($request->kategori, fn($q, $v) => $q->where('specialization', 'like', "%{$v}%"))
         ->get();
 
     return view('landing', compact('photographers'));
@@ -71,7 +72,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/bookings/{id}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');
     Route::delete('/bookings/{id}', [AdminBookingController::class, 'destroy'])->name('bookings.destroy');
 
-    Route::get('/schedule', [AdminBookingController::class, 'schedule'])->name('schedule.index');
+    Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
+    Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
+    Route::delete('/schedule/{id}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
 
     Route::resource('photographers', PhotographerController::class)
         ->only(['index', 'store', 'edit', 'update', 'destroy']);

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\Photographer;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -38,9 +38,29 @@ class BookingController extends Controller
             'status' => 'required|in:pending,confirmed,completed,cancelled',
         ]);
 
-        Booking::findOrFail($id)->update([
-            'status' => $request->status,
-        ]);
+        $booking = Booking::findOrFail($id);
+
+        if ($request->status === 'confirmed') {
+            $bentrok = Booking::where('id', '!=', $booking->id)
+                ->where('photographer_id', $booking->photographer_id)
+                ->whereDate('booking_date', $booking->booking_date)
+                ->where('status', 'confirmed')
+                ->exists();
+
+            if ($bentrok) {
+                return back()->withErrors(['status' => 'Gagal: fotografer ini sudah punya booking terkonfirmasi di tanggal yang sama (double booking).']);
+            }
+
+            $libur = Schedule::where('photographer_id', $booking->photographer_id)
+                ->whereDate('date', $booking->booking_date)
+                ->exists();
+
+            if ($libur) {
+                return back()->withErrors(['status' => 'Gagal: fotografer ditandai tidak tersedia pada tanggal ini.']);
+            }
+        }
+
+        $booking->update(['status' => $request->status]);
 
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui!');
     }
@@ -50,17 +70,5 @@ class BookingController extends Controller
         Booking::findOrFail($id)->delete();
 
         return redirect()->back()->with('success', 'Pemesanan berhasil dihapus!');
-    }
-
-    public function schedule()
-    {
-        $photographers = Photographer::with(['bookings' => function ($q) {
-            $q->with(['user', 'package'])
-              ->whereIn('status', ['pending', 'confirmed'])
-              ->whereDate('booking_date', '>=', today())
-              ->orderBy('booking_date');
-        }])->get();
-
-        return view('admin.schedule.index', compact('photographers'));
     }
 }
