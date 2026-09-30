@@ -12,7 +12,6 @@ class LandingController extends Controller
         return view('landing', [
             'photographers' => Photographer::all(),
             'categories'    => $this->categories(),
-            'cities'        => $this->cities(),
         ]);
     }
 
@@ -20,10 +19,10 @@ class LandingController extends Controller
     {
         $photographers = Photographer::all();
 
-        if ($request->filled('kota')) {
-            $kota = mb_strtolower(trim($request->kota));
+        if ($request->filled('lokasi')) {
+            $lokasi = mb_strtolower(trim($request->lokasi));
             $photographers = $photographers->filter(
-                fn ($p) => mb_strtolower(trim($p->city ?? '')) === $kota
+                fn ($p) => str_contains(mb_strtolower($p->city ?? ''), $lokasi)
             );
         }
 
@@ -39,7 +38,6 @@ class LandingController extends Controller
         return view('landing', [
             'photographers' => $photographers->values(),
             'categories'    => $this->categories(),
-            'cities'        => $this->cities(),
         ]);
     }
 
@@ -50,16 +48,6 @@ class LandingController extends Controller
             ->map(fn ($s) => trim($s))
             ->filter()
             ->unique(fn ($s) => mb_strtolower($s))
-            ->sort()
-            ->values();
-    }
-
-    private function cities()
-    {
-        return Photographer::pluck('city')
-            ->map(fn ($c) => trim($c ?? ''))
-            ->filter()
-            ->unique(fn ($c) => mb_strtolower($c))
             ->sort()
             ->values();
     }

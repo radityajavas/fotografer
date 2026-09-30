@@ -24,7 +24,7 @@
         </div>
         <div class="col-md-5">
           <label class="form-label">Keterangan (opsional)</label>
-          <input type="text" name="note" class="form-control" placeholder="Contoh: Libur, sakit, acara keluarga"
+          <input type="text" name="note" class="form-control" placeholder="Contoh: Libur, makan di mcd, farming piala"
                  value="{{ old('note') }}">
         </div>
       </div>

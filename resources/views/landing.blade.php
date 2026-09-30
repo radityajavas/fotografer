@@ -6,12 +6,7 @@
 <p class="text-secondary mb-4">Pilih kota dan kategori, lihat fotografer yang tersedia, lalu buat pesanan.</p>
 
 <form action="{{ route('fotografer.cari') }}" method="GET" class="search-bar mb-4">
-    <select name="kota" style="border-left: 0;">
-        <option value="">Semua kota</option>
-        @foreach ($cities as $city)
-            <option value="{{ $city }}" @selected(request('kota') == $city)>{{ $city }}</option>
-        @endforeach
-    </select>
+    <input type="text" name="lokasi" value="{{ request('lokasi') }}" placeholder="Cari lokasi, mis. Malang">
     <select name="kategori">
         <option value="">Semua kategori</option>
         @foreach ($categories as $cat)
