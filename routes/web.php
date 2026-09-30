@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Photographer;
 use App\Models\User;
 
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\ScheduleController;
@@ -35,7 +35,11 @@ Route::get('/fotografer/cari', function (Request $request) {
     return view('landing', compact('photographers'));
 })->name('fotografer.cari');
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', function () {
+    return auth()->user()->role === 'admin'
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('landing');
+})->middleware('auth')->name('home');
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
 
@@ -58,6 +62,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::redirect('/', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/chats', [AdminChatController::class, 'index'])->name('chats.index');
+    Route::get('/chats/{id}', [AdminChatController::class, 'show'])->name('chats.show');
+    Route::post('/chats/{id}', [AdminChatController::class, 'store'])->name('chats.store');
+
+    Route::get('/customers', function () {
+        $pelanggan = User::where('role', 'customer')->latest()->get();
+        return view('admin.customers', compact('pelanggan'));
+    })->name('customers.index');
     Route::get('/customers', function () {
         $pelanggan = User::where('role', 'customer')->latest()->get();
         return view('admin.customers', compact('pelanggan'));

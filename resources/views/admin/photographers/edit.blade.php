@@ -1,60 +1,59 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Edit Data Fotografer')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Header Halaman -->
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">Edit Data Fotografer</h1>
-            <p class="text-sm text-gray-500">Ubah informasi fotografer di bawah ini.</p>
-        </div>
-        <a href="{{ route('admin.photographers.index') }}" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-            Kembali
-        </a>
-    </div>
+@if ($errors->any())
+  <div class="alert alert-danger">
+    <ul class="mb-0">
+      @foreach ($errors->all() as $e)
+        <li>{{ $e }}</li>
+      @endforeach
+    </ul>
+  </div>
+@endif
 
-    <!-- Form Edit Fotografer -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <form action="{{ route('admin.photographers.update', $photographer->id) }}" method="POST">
-            @csrf
-            @method('PUT')
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Ubah informasi fotografer</h3>
+  </div>
 
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Nama Fotografer</label>
-                    <input type="text" name="name" value="{{ old('name', $photographer->name) }}" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
+  <div class="card-body">
+    <form method="POST" action="{{ route('admin.photographers.update', $photographer->id) }}">
+      @csrf
+      @method('PUT')
 
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                    <input type="text" name="phone" value="{{ old('phone', $photographer->phone) }}" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
+      <div class="mb-3">
+        <label class="form-label">Nama fotografer</label>
+        <input type="text" name="name" value="{{ old('name', $photographer->name) }}"
+               class="form-control @error('name') is-invalid @enderror" required>
+      </div>
 
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Spesialisasi</label>
-                    <input type="text" name="specialization" value="{{ old('specialization', $photographer->specialization) }}" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
+      <div class="mb-3">
+        <label class="form-label">Nomor telepon</label>
+        <input type="text" name="phone" value="{{ old('phone', $photographer->phone) }}"
+               class="form-control @error('phone') is-invalid @enderror" required>
+      </div>
 
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Status Ketersediaan</label>
-                    <select name="status" class="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500 bg-white" required>
-                        <option value="AVAILABLE" {{ $photographer->status == 'AVAILABLE' ? 'selected' : '' }}>AVAILABLE</option>
-                        <option value="UNAVAILABLE" {{ $photographer->status == 'UNAVAILABLE' ? 'selected' : '' }}>UNAVAILABLE</option>
-                    </select>
-                </div>
-            </div>
+      <div class="mb-3">
+        <label class="form-label">Spesialisasi</label>
+        <input type="text" name="specialization" value="{{ old('specialization', $photographer->specialization) }}"
+               class="form-control @error('specialization') is-invalid @enderror" required>
+      </div>
 
-            <div class="flex items-center gap-3">
-                <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">
-                    Simpan Perubahan
-                </button>
-                <a href="{{ route('admin.photographers.index') }}" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                    Batal
-                </a>
-            </div>
-        </form>
-    </div>
+      <div class="mb-3">
+        <label class="form-label">Status ketersediaan</label>
+        <select name="status" class="form-select">
+          <option value="AVAILABLE" @selected(old('status', $photographer->status) == 'AVAILABLE')>AVAILABLE</option>
+          <option value="UNAVAILABLE" @selected(old('status', $photographer->status) == 'UNAVAILABLE')>UNAVAILABLE</option>
+        </select>
+      </div>
 
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Simpan perubahan</button>
+        <a href="{{ route('admin.photographers.index') }}" class="btn">Batal</a>
+      </div>
+    </form>
+  </div>
 </div>
 @endsection

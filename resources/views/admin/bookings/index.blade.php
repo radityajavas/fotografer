@@ -1,68 +1,114 @@
 @extends('layouts.admin')
+
 @section('title', 'Data Booking')
 
 @section('content')
-<div class="row row-cards mb-3">
-  @foreach ([
-    'all'       => 'Semua',
-    'pending'   => 'Menunggu',
-    'confirmed' => 'Dikonfirmasi',
-    'completed' => 'Selesai',
-    'cancelled' => 'Dibatalkan',
-  ] as $key => $label)
-    <div class="col-6 col-lg">
-      <a href="{{ route('admin.bookings.index', ['status' => $key]) }}"
-         class="card card-link {{ ($status ?? 'all') === $key || (!$status && $key === 'all') ? 'border-primary' : '' }}">
-        <div class="card-body">
-          <div class="subheader">{{ $label }}</div>
-          <div class="h2 mb-0">{{ $stats[$key === 'all' ? 'total' : $key] }}</div>
-        </div>
-      </a>
-    </div>
-  @endforeach
+@php
+    $current = $status ?? 'all';
+    $badge = [
+        'pending'  => ['Menunggu', 'bg-yellow-lt'],
+        'diterima' => ['Diterima', 'bg-green-lt'],
+        'ditolak'  => ['Ditolak',  'bg-red-lt'],
+    ];
+@endphp
+
+<div class="row row-deck row-cards mb-3">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Total Pemesanan</div>
+      <div class="h1 mb-0">{{ $stats['total'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Menunggu Konfirmasi</div>
+      <div class="h1 mb-0">{{ $stats['pending'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Diterima</div>
+      <div class="h1 mb-0">{{ $stats['diterima'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Total Pendapatan</div>
+      <div class="h1 mb-0">Rp {{ number_format($stats['pendapatan'], 0, ',', '.') }}</div>
+    </div></div>
+  </div>
 </div>
 
 <div class="card">
-  <div class="card-header"><h3 class="card-title">Daftar Transaksi Booking</h3></div>
+  <div class="card-header">
+    <ul class="nav nav-pills card-header-pills">
+      @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'] as $val => $label)
+        <li class="nav-item">
+          <a class="nav-link {{ $current === $val ? 'active' : '' }}"
+             href="{{ route('admin.bookings.index', ['status' => $val]) }}">{{ $label }}</a>
+        </li>
+      @endforeach
+    </ul>
+  </div>
+
   <div class="table-responsive">
     <table class="table table-vcenter card-table">
       <thead>
         <tr>
-          <th>Pemesan</th><th>Fotografer</th><th>Tanggal Foto</th>
-          <th>Total Harga</th><th>Status</th><th class="w-1"></th>
+          <th>Pemesan</th>
+          <th>Fotografer</th>
+          <th>Tanggal Foto</th>
+          <th>Total Harga</th>
+          <th>Status</th>
+          <th class="text-center">Aksi</th>
         </tr>
       </thead>
       <tbody>
-        @forelse ($bookings as $b)
+        @forelse ($bookings as $booking)
+          @php $s = strtolower($booking->status); @endphp
           <tr>
-            <td>{{ $b->user->name ?? '-' }}</td>
-            <td>{{ $b->photographer->name ?? '-' }}</td>
-            <td>{{ \Carbon\Carbon::parse($b->booking_date)->format('d M Y') }}</td>
-            <td>Rp {{ number_format($b->package->price ?? 0, 0, ',', '.') }}</td>
+            <td class="fw-semibold">{{ $booking->user->name ?? '-' }}</td>
+            <td>{{ $booking->photographer->name ?? '-' }}</td>
+            <td>{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '-' }}</td>
             <td>
-              <form action="{{ route('admin.bookings.updateStatus', $b->id) }}" method="POST">
-                @csrf @method('PATCH')
-                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                  @foreach (['pending' => 'Menunggu', 'confirmed' => 'Dikonfirmasi', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $val => $text)
-                    <option value="{{ $val }}" @selected($b->status === $val)>{{ $text }}</option>
-                  @endforeach
-                </select>
-              </form>
+              @if ($booking->package)
+                Rp {{ number_format($booking->package->price, 0, ',', '.') }}
+              @else
+                -
+              @endif
             </td>
             <td>
-              <form action="{{ route('admin.bookings.destroy', $b->id) }}" method="POST"
-                    onsubmit="return confirm('Hapus booking ini?')">
-                @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger">Hapus</button>
+              <span class="badge {{ $badge[$s][1] ?? 'bg-secondary-lt' }}">
+                {{ $badge[$s][0] ?? $booking->status }}
+              </span>
+            </td>
+            <td class="text-center text-nowrap">
+              <form action="{{ route('admin.bookings.updateStatus', $booking->id) }}" method="POST" class="d-inline">
+                @csrf @method('PATCH')
+                <input type="hidden" name="status" value="diterima">
+                <button type="submit" class="btn btn-success btn-sm" @disabled($s === 'diterima')>Setujui</button>
               </form>
+
+              <form action="{{ route('admin.bookings.updateStatus', $booking->id) }}" method="POST" class="d-inline">
+                @csrf @method('PATCH')
+                <input type="hidden" name="status" value="ditolak">
+                <button type="submit" class="btn btn-danger btn-sm" @disabled($s === 'ditolak')>Tolak</button>
+              </form>
+
+              <a href="{{ route('admin.chats.show', $booking->id) }}" class="btn btn-sm">Chat</a>
             </td>
           </tr>
         @empty
-          <tr><td colspan="6" class="text-center text-secondary">Belum ada booking.</td></tr>
+          <tr>
+            <td colspan="6" class="text-center text-secondary py-4">Belum ada data booking.</td>
+          </tr>
         @endforelse
       </tbody>
     </table>
   </div>
-  <div class="card-footer">{{ $bookings->withQueryString()->links() }}</div>
+
+  @if ($bookings->hasPages())
+    <div class="card-footer">{{ $bookings->withQueryString()->links() }}</div>
+  @endif
 </div>
 @endsection

@@ -28,4 +28,8 @@ class Booking extends Model
     {
         return $this->belongsTo(Package::class);
     }
+        public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }

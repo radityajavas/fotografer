@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\Schedule;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -22,11 +21,14 @@ class BookingController extends Controller
         $bookings = $query->latest()->paginate(10);
 
         $stats = [
-            'total'     => Booking::count(),
-            'pending'   => Booking::where('status', 'pending')->count(),
-            'confirmed' => Booking::where('status', 'confirmed')->count(),
-            'completed' => Booking::where('status', 'completed')->count(),
-            'cancelled' => Booking::where('status', 'cancelled')->count(),
+            'total'      => Booking::count(),
+            'pending'    => Booking::where('status', 'pending')->count(),
+            'diterima'   => Booking::where('status', 'diterima')->count(),
+            'ditolak'    => Booking::where('status', 'ditolak')->count(),
+            'pendapatan' => Booking::with('package')
+                ->where('status', 'diterima')
+                ->get()
+                ->sum(fn ($b) => $b->package->price ?? 0),
         ];
 
         return view('admin.bookings.index', compact('bookings', 'stats', 'status'));
@@ -35,40 +37,14 @@ class BookingController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,completed,cancelled',
+            'status' => 'required|in:pending,diterima,ditolak',
         ]);
 
         $booking = Booking::findOrFail($id);
-
-        if ($request->status === 'confirmed') {
-            $bentrok = Booking::where('id', '!=', $booking->id)
-                ->where('photographer_id', $booking->photographer_id)
-                ->whereDate('booking_date', $booking->booking_date)
-                ->where('status', 'confirmed')
-                ->exists();
-
-            if ($bentrok) {
-                return back()->withErrors(['status' => 'Gagal: fotografer ini sudah punya booking terkonfirmasi di tanggal yang sama (double booking).']);
-            }
-
-            $libur = Schedule::where('photographer_id', $booking->photographer_id)
-                ->whereDate('date', $booking->booking_date)
-                ->exists();
-
-            if ($libur) {
-                return back()->withErrors(['status' => 'Gagal: fotografer ditandai tidak tersedia pada tanggal ini.']);
-            }
-        }
-
-        $booking->update(['status' => $request->status]);
+        $booking->update([
+            'status' => $request->status,
+        ]);
 
         return redirect()->back()->with('success', 'Status pemesanan berhasil diperbarui!');
-    }
-
-    public function destroy($id)
-    {
-        Booking::findOrFail($id)->delete();
-
-        return redirect()->back()->with('success', 'Pemesanan berhasil dihapus!');
     }
 }

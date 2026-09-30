@@ -1,52 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto p-4">
-    <!-- Header Chat -->
-    <div class="bg-white p-4 border border-gray-200 rounded-t-xl flex justify-between items-center shadow-sm">
-        <div>
-            <h2 class="font-bold text-gray-800 text-lg">
-                Chat: {{ $booking->photographer->name ?? 'Fotografer' }}
-            </h2>
-            <p class="text-xs text-gray-500">
-                Paket: {{ $booking->package->name ?? '-' }} | Tanggal: {{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}
-            </p>
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+
+    <a href="{{ route('bookings.my') }}" class="small">&larr; Kembali ke pesanan</a>
+    <h2 class="h4 mt-2 mb-1">Chat dengan admin</h2>
+    <p class="text-secondary small">
+      Pesanan: {{ $booking->photographer->name ?? '-' }} &bull; {{ $booking->package->name ?? '-' }}
+      &bull; {{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '-' }}
+    </p>
+
+    <div class="border bg-white p-3 mb-3" style="height: 380px; overflow-y: auto;" id="chat-box">
+      @forelse ($messages as $m)
+        @php $mine = $m->sender_id === auth()->id(); @endphp
+        <div class="d-flex mb-2 {{ $mine ? 'justify-content-end' : 'justify-content-start' }}">
+          <div class="px-3 py-2 rounded {{ $mine ? 'bg-dark text-white' : 'bg-light border' }}" style="max-width: 80%;">
+            <div class="small opacity-75">{{ $mine ? 'Kamu' : 'Admin' }} &bull; {{ $m->created_at->format('d M H:i') }}</div>
+            <div>{{ $m->message }}</div>
+          </div>
         </div>
-        <a href="{{ route('bookings.my') }}" class="text-sm text-gray-600 hover:text-indigo-600">
-            ← Kembali
-        </a>
+      @empty
+        <p class="text-secondary text-center mt-5 mb-0">Belum ada pesan. Tulis pesan pertamamu di bawah.</p>
+      @endforelse
     </div>
 
-    <!-- Area Pesan (Kotak Chat) -->
-    <div class="bg-gray-50 p-4 border-x border-gray-200 h-96 overflow-y-auto flex flex-col gap-3">
-        @forelse($messages as $msg)
-            @php $isMe = $msg->sender_id === auth()->id(); @endphp
-            <div class="flex flex-col {{ $isMe ? 'items-end' : 'items-start' }}">
-                <span class="text-[10px] text-gray-400 mb-0.5">
-                    {{ $msg->sender->name }} • {{ $msg->created_at->format('H:i') }}
-                </span>
-                <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl text-sm {{ $isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm' }}">
-                    {{ $msg->message }}
-                </div>
-            </div>
-        @empty
-            <div class="m-auto text-center text-gray-400 text-sm">
-                Belum ada pesan. Mulai percakapan sekarang!
-            </div>
-        @endforelse
-    </div>
+    <form method="POST" action="{{ route('chat.store', $booking->id) }}" class="d-flex gap-2">
+      @csrf
+      <input type="text" name="message" class="form-control @error('message') is-invalid @enderror"
+             placeholder="Tulis pesan..." required autocomplete="off">
+      <button class="btn btn-brand">Kirim</button>
+    </form>
+    @error('message') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
 
-    <!-- Form Kirim Pesan -->
-    <div class="bg-white p-3 border border-gray-200 rounded-b-xl shadow-sm">
-        <form action="{{ route('chat.store', $booking->id) }}" method="POST" class="flex gap-2">
-            @csrf
-            <input type="text" name="message" placeholder="Tulis pesan kamu di sini..." required
-                   class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button type="submit" 
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-lg text-sm transition">
-                Kirim
-            </button>
-        </form>
-    </div>
+  </div>
 </div>
-@endsection 
+
+<script>
+  var box = document.getElementById('chat-box');
+  box.scrollTop = box.scrollHeight;
+</script>
+@endsection

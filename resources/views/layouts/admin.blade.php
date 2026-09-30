@@ -17,6 +17,7 @@
         ['route' => 'admin.photographers.index', 'pattern' => 'admin.photographers.*', 'label' => 'Fotografer'],
         ['route' => 'admin.packages.index',      'pattern' => 'admin.packages.*',      'label' => 'Paket'],
         ['route' => 'admin.customers.index',     'pattern' => 'admin.customers.*',     'label' => 'Pelanggan'],
+        ['pattern' => 'admin.chats.*', 'route' => 'admin.chats.index', 'label' => 'Chat'],
       ];
     @endphp
 
