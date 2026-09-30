@@ -1,45 +1,35 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Photographer;
 use App\Models\User;
 
-use App\Http\Controllers\Admin\ChatController as AdminChatController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ChatController;
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PhotographerController;
 use App\Http\Controllers\Admin\PackageController;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 
 // 1. Auth
 Auth::routes();
 
 // 2. Public
-Route::get('/', function () {
-    $photographers = Photographer::all();
-    return view('landing', compact('photographers'));
-})->name('landing');
-
-Route::get('/fotografer/cari', function (Request $request) {
-    $photographers = Photographer::query()
-        ->when($request->kategori, fn($q, $v) => $q->where('specialization', 'like', "%{$v}%"))
-        ->get();
-
-    return view('landing', compact('photographers'));
-})->name('fotografer.cari');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/fotografer/cari', [LandingController::class, 'cari'])->name('fotografer.cari');
 
 Route::get('/home', function () {
     return auth()->user()->role === 'admin'
         ? redirect()->route('admin.dashboard')
         : redirect()->route('landing');
 })->middleware('auth')->name('home');
+
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
 
@@ -66,10 +56,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/chats/{id}', [AdminChatController::class, 'show'])->name('chats.show');
     Route::post('/chats/{id}', [AdminChatController::class, 'store'])->name('chats.store');
 
-    Route::get('/customers', function () {
-        $pelanggan = User::where('role', 'customer')->latest()->get();
-        return view('admin.customers', compact('pelanggan'));
-    })->name('customers.index');
     Route::get('/customers', function () {
         $pelanggan = User::where('role', 'customer')->latest()->get();
         return view('admin.customers', compact('pelanggan'));

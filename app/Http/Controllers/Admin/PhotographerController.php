@@ -21,6 +21,7 @@ class PhotographerController extends Controller
             'phone'          => 'required|string|max:50',
             'specialization' => 'required|string|max:255',
             'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
+            'city' => 'nullable|string|max:100',
         ]);
 
         Photographer::create($validated);
@@ -42,6 +43,7 @@ class PhotographerController extends Controller
             'phone'          => 'required|string|max:50',
             'specialization' => 'required|string|max:255',
             'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
+            'city' => 'nullable|string|max:100',
         ]);
 
         $photographer = Photographer::findOrFail($id);

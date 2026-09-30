@@ -1,48 +1,83 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-12">
-    <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Booking</h2>
+@php $offDates = $offDates ?? collect(); @endphp
 
-        <form action="{{ route('booking.store') }}" method="POST" class="space-y-6">
-            @csrf
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
 
-            <!-- Fotografer Yang Dipilih -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Fotografer</label>
-                <input type="hidden" name="photographer_id" value="{{ $selectedPhotographer->id ?? '' }}">
-                <input type="text" readonly value="{{ $selectedPhotographer->name ?? 'Fotografer Tidak Ditemukan' }}" 
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700">
-            </div>
+    <h2 class="h4 mb-3">Pesan fotografer</h2>
 
-            <!-- Pilih Paket -->
-            <div>
-                <label for="package_id" class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Paket</label>
-                <select name="package_id" id="package_id" required class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500">
-                    <option value="">-- Pilih Paket Fotografi --</option>
-                    @foreach($packages as $pkg)
-                        <option value="{{ $pkg->id }}">{{ $pkg->name ?? $pkg->nama_paket }} - Rp {{ number_format($pkg->price ?? $pkg->harga ?? 0, 0, ',', '.') }}</option>
-                    @endforeach
-                </select>
-            </div>
+    <form action="{{ route('booking.store') }}" method="POST">
+      @csrf
 
-            <!-- Tanggal Pelaksanaan (Menggunakan input type="date" agar muncul ikon & kalender bawaan) -->
-            <div>
-                <label for="booking_date" class="block text-xs font-semibold text-gray-700 uppercase mb-2">Tanggal Pelaksanaan</label>
-                <input type="date" name="booking_date" id="booking_date" required min="{{ date('Y-m-d') }}" class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 bg-white cursor-pointer">
-            </div>
+      <div class="mb-3">
+        <label class="form-label">Fotografer</label>
+        <input type="hidden" name="photographer_id" value="{{ $selectedPhotographer->id ?? '' }}">
+        <input type="text" class="form-control" readonly
+               value="{{ $selectedPhotographer->name ?? 'Fotografer tidak ditemukan' }}">
+      </div>
 
-            <!-- Alamat / Lokasi Pemotretan (Posisi di Paling Bawah Sebelum Tombol) -->
-            <div>
-                <label for="lokasi" class="block text-xs font-semibold text-gray-700 uppercase mb-2">Alamat / Lokasi Pemotretan</label>
-                <textarea name="lokasi" id="lokasi" rows="3" required placeholder="Masukkan alamat lengkap lokasi acara..." class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
-            </div>
+      <div class="mb-3">
+        <label for="package_id" class="form-label">Paket</label>
+        <select name="package_id" id="package_id"
+                class="form-select @error('package_id') is-invalid @enderror" required>
+          <option value="">Pilih paket</option>
+          @foreach ($packages as $pkg)
+            <option value="{{ $pkg->id }}" @selected(old('package_id') == $pkg->id)>
+              {{ $pkg->name }} - Rp{{ number_format($pkg->price ?? 0, 0, ',', '.') }}
+            </option>
+          @endforeach
+        </select>
+        @error('package_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+      </div>
 
-            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition">
-                Konfirmasi Booking
-            </button>
-        </form>
-    </div>
+      <div class="mb-3">
+        <label for="booking_date" class="form-label">Tanggal pelaksanaan</label>
+        <input type="date" name="booking_date" id="booking_date"
+               value="{{ old('booking_date') }}" min="{{ date('Y-m-d') }}"
+               class="form-control @error('booking_date') is-invalid @enderror" required>
+        <div class="invalid-feedback" id="date-warning">
+          @error('booking_date') {{ $message }} @enderror
+        </div>
+
+        @if ($offDates->isNotEmpty())
+          <div class="form-text">
+            Tanggal libur fotografer:
+            {{ $offDates->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M Y'))->implode(', ') }}
+          </div>
+        @endif
+      </div>
+
+      <div class="mb-3">
+        <label for="lokasi" class="form-label">Alamat / lokasi pemotretan</label>
+        <textarea name="lokasi" id="lokasi" rows="3"
+                  class="form-control @error('lokasi') is-invalid @enderror"
+                  required>{{ old('lokasi') }}</textarea>
+        @error('lokasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+      </div>
+
+      <button type="submit" class="btn btn-brand">Konfirmasi booking</button>
+      <a href="{{ route('landing') }}" class="ms-2">Batal</a>
+    </form>
+
+  </div>
 </div>
+
+<script>
+  var offDates = @json($offDates);
+  var dateInput = document.getElementById('booking_date');
+  var warning = document.getElementById('date-warning');
+
+  dateInput.addEventListener('input', function () {
+    if (offDates.indexOf(dateInput.value) !== -1) {
+      dateInput.classList.add('is-invalid');
+      warning.textContent = 'Fotografer tidak tersedia pada tanggal ini.';
+      dateInput.setCustomValidity('Tanggal libur');
+    } else {
+      dateInput.classList.remove('is-invalid');
+      dateInput.setCustomValidity('');
+    }
+  });
+</script>
 @endsection

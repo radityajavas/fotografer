@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Photographer extends Model
 {
-    protected $fillable = ['name', 'phone', 'specialization', 'status'];
+    protected $fillable = ['name', 'phone', 'city', 'specialization', 'status'];
 
     public function bookings()
     {

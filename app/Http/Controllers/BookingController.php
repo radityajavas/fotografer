@@ -6,32 +6,59 @@ use Illuminate\Http\Request;
 use App\Models\Photographer;
 use App\Models\Package;
 use App\Models\Booking;
+use App\Models\Schedule;
 
 class BookingController extends Controller
 {
-    // ==========================================
-    // 1. FITUR PELANGGAN (CUSTOMER)
-    // ==========================================
-
-    // Menampilkan Form Booking
+    // Menampilkan form booking
     public function create(Request $request)
     {
         $photographerId = $request->query('photographer_id');
         $selectedPhotographer = Photographer::find($photographerId);
         $packages = Package::all();
 
-        return view('booking.create', compact('selectedPhotographer', 'packages'));
+        $offDates = Schedule::where('photographer_id', $photographerId)
+            ->whereDate('date', '>=', today())
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($s) => $s->date->format('Y-m-d'))
+            ->values();
+
+        return view('booking.create', compact('selectedPhotographer', 'packages', 'offDates'));
     }
 
-    // Memproses Simpan Booking
+    // Memproses simpan booking
     public function store(Request $request)
     {
         $request->validate([
             'photographer_id' => 'required|exists:photographers,id',
-            'package_id'      => 'required',
-            'booking_date'    => 'required|date',
+            'package_id'      => 'required|exists:packages,id',
+            'booking_date'    => 'required|date|after_or_equal:today',
             'lokasi'          => 'required|string|max:500',
         ]);
+
+        // 1. Fotografer libur di tanggal itu
+        $libur = Schedule::where('photographer_id', $request->photographer_id)
+            ->whereDate('date', $request->booking_date)
+            ->exists();
+
+        if ($libur) {
+            return back()
+                ->withErrors(['booking_date' => 'Fotografer tidak tersedia pada tanggal ini.'])
+                ->withInput();
+        }
+
+        // 2. Tanggal itu sudah dipesan (sudah diterima admin)
+        $sudahDipesan = Booking::where('photographer_id', $request->photographer_id)
+            ->whereDate('booking_date', $request->booking_date)
+            ->whereIn('status', ['diterima', 'confirmed'])
+            ->exists();
+
+        if ($sudahDipesan) {
+            return back()
+                ->withErrors(['booking_date' => 'Tanggal ini sudah dipesan pelanggan lain.'])
+                ->withInput();
+        }
 
         Booking::create([
             'user_id'         => auth()->id(),
@@ -42,10 +69,10 @@ class BookingController extends Controller
             'status'          => 'pending',
         ]);
 
-        return redirect()->route('home')->with('success', 'Pemesanan berhasil dibuat!');
+        return redirect()->route('bookings.my')->with('success', 'Pemesanan berhasil dibuat!');
     }
 
-    // Menampilkan daftar pesanan milik pengguna yang sedang login
+    // Daftar pesanan milik pengguna yang sedang login
     public function myBookings()
     {
         $bookings = Booking::with(['photographer', 'package'])
@@ -56,53 +83,10 @@ class BookingController extends Controller
         return view('booking.my_bookings', compact('bookings'));
     }
 
-    // ==========================================
-    // 2. FITUR ADMIN
-    // ==========================================
-
-    // Menampilkan Daftar Booking & Statistik di Halaman Admin
-    public function adminIndex()
-    {
-        $bookings = Booking::with(['user', 'photographer', 'package'])->latest()->get();
-
-        // Menhitung total pendapatan dari booking status approved atau completed
-        $totalPendapatan = $bookings->filter(function ($booking) {
-            return in_array(strtolower($booking->status), ['approved', 'diterima', 'completed']);
-        })->sum(function ($booking) {
-            return $booking->package ? $booking->package->price : ($booking->total_harga ?? 0);
-        });
-
-        // Variabel $stats lengkap sesuai kebutuhan view blade admin
-        $stats = [
-            'total_booking'    => $bookings->count(),
-            'pending'          => $bookings->filter(fn($b) => in_array(strtolower($b->status), ['pending', 'menunggu']))->count(),
-            'approved'         => $bookings->filter(fn($b) => in_array(strtolower($b->status), ['approved', 'diterima']))->count(),
-            'completed'        => $bookings->filter(fn($b) => strtolower($b->status) == 'completed')->count(),
-            'total_pendapatan' => $totalPendapatan,
-        ];
-
-        return view('admin.bookings.index', compact('bookings', 'stats'));
-    }
-
-    // Mengubah Status Booking (Approve/Reject/Complete)
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|string',
-        ]);
-
-        $booking = Booking::findOrFail($id);
-        $booking->update([
-            'status' => $request->status,
-        ]);
-
-        return redirect()->back()->with('success', 'Status booking berhasil diperbarui!');
-    }
-
-    // Menampilkan Jadwal Pemotretan Fotografer
+    // Jadwal pemotretan fotografer (halaman admin)
     public function schedule()
     {
-        $photographers = Photographer::with(['bookings' => function($query) {
+        $photographers = Photographer::with(['bookings' => function ($query) {
             $query->whereIn('status', ['approved', 'completed', 'Diterima'])->orderBy('booking_date', 'asc');
         }])->get();
 

@@ -3,17 +3,22 @@
 @section('content')
 
 <h1 class="fw-bold mb-1" style="letter-spacing:-0.02em;">Temukan fotografer untuk momenmu</h1>
-<p class="text-secondary mb-4">Pilih yang sedang tersedia, lihat spesialisasinya, lalu buat pesanan.</p>
+<p class="text-secondary mb-4">Pilih kota dan kategori, lihat fotografer yang tersedia, lalu buat pesanan.</p>
 
-<!-- Bar pencarian terpadu -->
 <form action="{{ route('fotografer.cari') }}" method="GET" class="search-bar mb-4">
-    <input type="text" name="lokasi" value="{{ request('lokasi') }}" placeholder="Lokasi, mis. Malang">
+    <select name="kota" style="border-left: 0;">
+        <option value="">Semua kota</option>
+        @foreach ($cities as $city)
+            <option value="{{ $city }}" @selected(request('kota') == $city)>{{ $city }}</option>
+        @endforeach
+    </select>
     <select name="kategori">
         <option value="">Semua kategori</option>
-        <option value="wedding">Wedding / Prewedding</option>
-        <option value="portrait">Portrait / Modeling</option>
-        <option value="event">Event / Konser</option>
-        <option value="product">Produk UMKM</option>
+        @foreach ($categories as $cat)
+            <option value="{{ $cat }}" @selected(request('kategori') == $cat)>
+                {{ \Illuminate\Support\Str::ucfirst($cat) }}
+            </option>
+        @endforeach
     </select>
     <button type="submit" class="btn btn-brand">Cari</button>
 </form>
@@ -25,17 +30,15 @@
                 <tr>
                     <th>Fotografer</th>
                     <th>Spesialisasi</th>
-                    <th>Rating</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($photographers as $item)
+                @forelse ($photographers as $item)
                     @php
-                        $rating = $item->rating ?? null;
-                        $chips  = array_filter(array_map('trim', explode(',', $item->specialization ?? '')));
-                        $foto   = $item->photo ?? null;
+                        $chips = array_filter(array_map('trim', explode(',', $item->specialization ?? '')));
+                        $foto  = $item->photo ?? null;
                     @endphp
                     <tr>
                         <td>
@@ -47,7 +50,9 @@
                                 @endif
                                 <div>
                                     <div class="fw-semibold">{{ $item->name }}</div>
-                                    <div class="small text-secondary">{{ $item->phone }}</div>
+                                    <div class="small text-secondary">
+                                        {{ $item->phone }}@if ($item->city) &bull; {{ $item->city }}@endif
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -58,19 +63,6 @@
                             @empty
                                 <span class="text-secondary small">-</span>
                             @endforelse
-                        </td>
-
-                        <td>
-                            @if ($rating)
-                                <span class="stars">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <span class="{{ $i <= round($rating) ? '' : 'off' }}">★</span>
-                                    @endfor
-                                </span>
-                                <span class="small text-secondary ms-1">{{ number_format($rating, 1) }}</span>
-                            @else
-                                <span class="small text-secondary">Belum ada rating</span>
-                            @endif
                         </td>
 
                         <td>
@@ -92,7 +84,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-secondary py-5">Belum ada fotografer.</td>
+                        <td colspan="4" class="text-center text-secondary py-5">Belum ada fotografer.</td>
                     </tr>
                 @endforelse
             </tbody>
