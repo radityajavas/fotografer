@@ -27,7 +27,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <h1 class="navbar-brand navbar-brand-autodark">
-          <a href="{{ route('admin.dashboard') }}">{{ config('app.name') }}</a>
+          <a href="{{ route('admin.dashboard') }}">Admin</a>
         </h1>
 
         <div class="collapse navbar-collapse" id="sidebar-menu">
