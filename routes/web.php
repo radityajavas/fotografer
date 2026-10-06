@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\ProfileController;
 
 // 1. Auth
 Auth::routes();
@@ -35,6 +36,14 @@ Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact']
 
 Route::get('/photographer/detail', function () {
     return view('photographers.show');
+});
+
+// PROFIL
+Route::middleware(['auth'])->group(function () {
+
+    // Upload foto profil pelanggan
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])
+        ->name('profile.photo');
 });
 
 // 3. Pelanggan

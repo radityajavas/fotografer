@@ -2,7 +2,6 @@
 @section('title', 'Fotografer')
 
 @section('content')
-@include('admin.partials.alerts')
 
 <div class="card">
   <div class="card-header">
@@ -13,12 +12,13 @@
   </div>
   <div class="table-responsive">
     <table class="table table-vcenter card-table">
-      <thead><tr><th>Nama</th><th>Telepon</th><th>Spesialisasi</th><th>Status</th><th class="w-1"></th></tr></thead>
+      <thead><tr><th>Nama</th><th>Telepon</th><th>Kota</th><th>Spesialisasi</th><th>Status</th><th class="w-1"></th></tr></thead>
       <tbody>
         @forelse ($photographers as $p)
           <tr>
             <td>{{ $p->name }}</td>
             <td>{{ $p->phone }}</td>
+            <td>{{ $p->city }}</td>
             <td>{{ $p->specialization }}</td>
             <td>
               <span class="badge {{ $p->status === 'AVAILABLE' ? 'bg-green-lt' : 'bg-red-lt' }}">{{ $p->status }}</span>
