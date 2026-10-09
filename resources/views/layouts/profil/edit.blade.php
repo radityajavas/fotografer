@@ -67,7 +67,7 @@
                         name="phone"
                         class="form-control @if ($errors->has('phone')) is-invalid @endif"
                         value="{{ old('phone', $user->phone ?? '') }}"
-                        placeholder="Masukkan 8–15 digit nomor"
+                        placeholder=""
                         inputmode="numeric"
                         maxlength="15"
                         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15); validasiTelepon(this)">
