@@ -34,7 +34,7 @@ class ProfileController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'phone' => ['nullable','regex:/^[0-9]{8,15}$/',],
-            'address' => ['nullable', 'string', 'max:1000'],
+            'address' => ['nullable', 'string', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 

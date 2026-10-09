@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,11 +49,20 @@
         }
 
         .profile-avatar {
-            width: 38px;
-            height: 38px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #198754;
+            background-color: #e0f2f1;
+            color: #087f75;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 1;
         }
 
         .profile-initial {
@@ -66,6 +75,10 @@
             background-color: #198754;
             color: white;
             font-weight: bold;
+            font-size: 13px;
+            line-height: 1;
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .profile-dropdown {
@@ -126,12 +139,12 @@
             </a>
 
             <button class="navbar-toggler"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarProfil"
-                    aria-controls="navbarProfil"
-                    aria-expanded="false"
-                    aria-label="Buka navigasi">
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarProfil"
+                aria-controls="navbarProfil"
+                aria-expanded="false"
+                aria-label="Buka navigasi">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -142,7 +155,7 @@
                     {{-- MENU HOME --}}
                     <li class="nav-item">
                         <a class="nav-link"
-                           href="{{ route('landing') }}">
+                            href="{{ route('landing') }}">
                             <i class="bi bi-house-door"></i>
                             Home
                         </a>
@@ -150,116 +163,116 @@
 
                     @auth
 
-                        {{-- MENU PROFILE --}}
-                        <li class="nav-item ms-lg-2">
-                            <div class="d-flex align-items-center gap-1">
+                    {{-- MENU PROFILE --}}
+                    <li class="nav-item ms-lg-2">
+                        <div class="d-flex align-items-center gap-1">
 
-                                {{-- Klik foto/nama untuk membuka halaman profil --}}
-                                <a class="nav-link d-flex align-items-center gap-2
+                            {{-- Klik foto/nama untuk membuka halaman profil --}}
+                            <a class="nav-link d-flex align-items-center gap-2
                                     {{ request()->routeIs('profile') ? 'active' : '' }}"
-                                   href="{{ route('profile') }}">
+                                href="{{ route('profile') }}">
 
-                                    @if (auth()->user()->photo)
-                                        <img
-                                            src="{{ asset('storage/' . auth()->user()->photo) }}"
-                                            alt="Foto Profil"
-                                            class="profile-avatar">
-                                    @else
-                                        <span class="profile-initial">
-                                            {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                                        </span>
-                                    @endif
+                                @if (auth()->user()->photo)
+                                <img
+                                    src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                    alt="Foto Profil"
+                                    class="profile-avatar">
+                                @else
+                                <span class="profile-initial">
+                                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                                </span>
+                                @endif
 
-                                    <span>Profile</span>
-                                </a>
-
-                                {{-- FORM GANTI FOTO --}}
-                                <form
-                                    action="{{ route('profile.photo') }}"
-                                    method="POST"
-                                    enctype="multipart/form-data"
-                                    id="layoutPhotoForm">
-
-                                    @csrf
-
-                                    <input
-                                        type="file"
-                                        name="photo"
-                                        id="layoutPhotoInput"
-                                        accept="image/jpeg,image/png,image/webp"
-                                        class="d-none"
-                                        onchange="submitProfilePhoto()">
-
-                                </form>
-
-                            </div>
-                        </li>
-
-                        {{-- DROPDOWN AKUN --}}
-                        <li class="nav-item dropdown ms-lg-2">
-                            <a class="nav-link dropdown-toggle"
-                               href="#"
-                               id="accountDropdown"
-                               role="button"
-                               data-bs-toggle="dropdown"
-                               aria-expanded="false">
-                                {{ auth()->user()->name }}
+                                <span>Profile</span>
                             </a>
 
-                            <ul class="dropdown-menu dropdown-menu-end profile-dropdown"
-                                aria-labelledby="accountDropdown">
+                            {{-- FORM GANTI FOTO --}}
+                            <form
+                                action="{{ route('profile.photo') }}"
+                                method="POST"
+                                enctype="multipart/form-data"
+                                id="layoutPhotoForm">
 
-                                <li class="px-3 py-2">
-                                    <div class="fw-semibold">
-                                        {{ auth()->user()->name }}
-                                    </div>
+                                @csrf
 
-                                    <small class="text-muted">
-                                        {{ auth()->user()->email }}
-                                    </small>
-                                </li>
+                                <input
+                                    type="file"
+                                    name="photo"
+                                    id="layoutPhotoInput"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    class="d-none"
+                                    onchange="submitProfilePhoto()">
 
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
+                            </form>
 
-                                <li>
-                                    <a class="dropdown-item"
-                                       href="{{ route('profile') }}">
-                                        <i class="bi bi-person me-2"></i>
-                                        Profil Saya
-                                    </a>
-                                </li>
+                        </div>
+                    </li>
 
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST">
-                                        @csrf
+                    {{-- DROPDOWN AKUN --}}
+                    <li class="nav-item dropdown ms-lg-2">
+                        <a class="nav-link dropdown-toggle"
+                            href="#"
+                            id="accountDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            {{ auth()->user()->name }}
+                        </a>
 
-                                        <button type="submit"
-                                                class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-2"></i>
-                                            Logout
-                                        </button>
-                                    </form>
-                                </li>
+                        <ul class="dropdown-menu dropdown-menu-end profile-dropdown"
+                            aria-labelledby="accountDropdown">
 
-                            </ul>
-                        </li>
+                            <li class="px-3 py-2">
+                                <div class="fw-semibold">
+                                    {{ auth()->user()->name }}
+                                </div>
+
+                                <small class="text-muted">
+                                    {{ auth()->user()->email }}
+                                </small>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('profile') }}">
+                                    <i class="bi bi-person me-2"></i>
+                                    Profil Saya
+                                </a>
+                            </li>
+
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+
+                                    <button type="submit"
+                                        class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+
+                        </ul>
+                    </li>
 
                     @else
 
-                        {{-- MENU PENGUNJUNG --}}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">
-                                Login
-                            </a>
-                        </li>
+                    {{-- MENU PENGUNJUNG --}}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">
+                            Login
+                        </a>
+                    </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">
-                                Register
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('register') }}">
+                            Register
+                        </a>
+                    </li>
 
                     @endauth
 
@@ -270,52 +283,52 @@
 
     {{-- NOTIFIKASI --}}
     @if (session('success'))
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show"
-                 role="alert">
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show"
+            role="alert">
 
-                {{ session('success') }}
+            {{ session('success') }}
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                        aria-label="Tutup"></button>
-            </div>
+            <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Tutup"></button>
         </div>
+    </div>
     @endif
 
     @if (session('error'))
-        <div class="container mt-3">
-            <div class="alert alert-danger alert-dismissible fade show"
-                 role="alert">
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show"
+            role="alert">
 
-                {{ session('error') }}
+            {{ session('error') }}
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                        aria-label="Tutup"></button>
-            </div>
+            <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Tutup"></button>
         </div>
+    </div>
     @endif
 
     @if ($errors->any())
-        <div class="container mt-3">
-            <div class="alert alert-danger alert-dismissible fade show"
-                 role="alert">
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show"
+            role="alert">
 
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                        aria-label="Tutup"></button>
-            </div>
+            <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Tutup"></button>
         </div>
+    </div>
     @endif
 
     {{-- KONTEN HALAMAN --}}
@@ -363,4 +376,5 @@
     @stack('scripts')
 
 </body>
-</html>
+
+</html>yg mana

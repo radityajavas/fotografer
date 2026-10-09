@@ -242,15 +242,36 @@
             font-size: .8rem;
         }
 
-        /* Foto profil di navbar */
+        /* Foto profil dan inisial navbar */
         .profile-avatar {
             width: 2.6rem;
             height: 2.6rem;
+            min-width: 2.6rem;
             border-radius: 50%;
-            position: relative;
-            display: block;
+            flex: 0 0 2.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
+
+        img.profile-avatar {
             object-fit: cover;
-            cursor: pointer;
+        }
+
+        .avatar-fallback {
+            background: var(--brand-soft);
+            color: var(--brand);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: .85rem;
+            line-height: 1;
+            text-align: center;
+            text-indent: 0;
         }
 
         .profile-avatar img,
@@ -299,45 +320,46 @@
 
                     @guest
 
-                        <a href="{{ route('login') }}" class="btn btn-outline-light px-4">
-                            Masuk
-                        </a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-light px-4">
+                        Masuk
+                    </a>
 
-                        <a href="{{ route('register') }}" class="btn btn-light text-success fw-bold px-4">
-                            Daftar
-                        </a>
+                    <a href="{{ route('register') }}" class="btn btn-light text-success fw-bold px-4">
+                        Daftar
+                    </a>
 
                     @else
 
-                        {{-- Foto profil: klik untuk menuju halaman Profile --}}
-                        <a href="{{ route('profile') }}"
-                           class="profile-avatar text-decoration-none"
-                           title="Profil Saya">
+                    {{-- Foto profil: klik untuk menuju halaman Profile --}}
+                    <a href="{{ route('profile') }}"
+                        class="profile-avatar text-decoration-none"
+                        title="Profil Saya">
 
-                            @if (auth()->user()->photo)
-                                <img
-                                    src="{{ asset('storage/' . auth()->user()->photo) }}"
-                                    alt="Foto Profil"
-                                    class="profile-avatar">
-                            @else
-                                <div class="avatar-fallback profile-avatar">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                                </div>
-                            @endif
-
-                        </a>
-
-                        <span class="small fw-medium me-2 text-white">
-                            {{ auth()->user()->name }}
+                        @if (auth()->user()->photo)
+                        <img
+                            src="{{ asset('storage/' . auth()->user()->photo) }}"
+                            alt="Foto Profil"
+                            class="w-100 h-100 rounded-circle"
+                            style="object-fit: cover;">
+                        @else
+                        <span class="avatar-fallback w-100 h-100 rounded-circle d-inline-flex align-items-center justify-content-center">
+                            {{ strtoupper(mb_substr(auth()->user()->name ?? 'U', 0, 1)) }}
                         </span>
+                        @endif
 
-                        <form action="{{ route('logout') }}" method="POST" class="m-0">
-                            @csrf
+                    </a>
 
-                            <button type="submit" class="btn btn-outline-light btn-sm px-3">
-                                Keluar
-                            </button>
-                        </form>
+                    <span class="small fw-medium me-2 text-white">
+                        {{ auth()->user()->name }}
+                    </span>
+
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
+                        @csrf
+
+                        <button type="submit" class="btn btn-outline-light btn-sm px-3">
+                            Keluar
+                        </button>
+                    </form>
 
                     @endguest
 
@@ -349,15 +371,15 @@
     <main class="container py-4 py-md-5">
 
         @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
         @endif
 
         @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
         @endif
 
         @yield('content')
