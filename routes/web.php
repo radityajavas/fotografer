@@ -27,7 +27,7 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/fotografer/cari', [LandingController::class, 'cari'])->name('fotografer.cari');
 
 Route::get('/home', function () {
-    return auth()->user()->role === 'admin'
+    return auth()->user()->role === 'admin' 
         ? redirect()->route('admin.dashboard')
         : redirect()->route('landing');
 })->middleware('auth')->name('home');
@@ -62,11 +62,13 @@ Route::middleware(['auth'])->group(function () {
 // 4. Pelanggan
 Route::middleware(['auth'])->group(function () {
     Route::resource('booking', BookingController::class);
+    Route::get('/my-bookings', [BookingController::class, 'myBookings'])
+        ->name('bookings.my');
     Route::resource('pelanggan', PelangganController::class);
-    Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('bookings.my');
-
-    Route::get('/booking/{id}/chat', [ChatController::class, 'show'])->name('chat.show');
-    Route::post('/booking/{id}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/booking/{id}/chat', [ChatController::class, 'show'])
+        ->name('chat.show');
+    Route::post('/booking/{id}/chat', [ChatController::class, 'store'])
+        ->name('chat.store');
 });
 
 // 5. Admin (auth + admin)

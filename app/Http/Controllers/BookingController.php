@@ -40,7 +40,6 @@ class BookingController extends Controller
             'photographer_id' => ['required', 'exists:photographers,id'],
             'package_id'      => ['required', 'exists:packages,id'],
             'booking_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . today()->addYears(2)->toDateString()],
-            'kota'            => ['required', 'string', 'max:100'],
             'lokasi'          => ['required', 'string', 'min:10', 'max:400'],
         ], [
             'lokasi.min'                  => 'Alamat terlalu singkat, tulis minimal 10 karakter (jalan, nomor, patokan).',
@@ -56,17 +55,8 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // 1. Lokasi hanya boleh di kota yang dijangkau fotografer
-        $areas = collect($photographer->serviceAreas());
-        $kota  = $areas->first(fn ($a) => mb_strtolower($a) === mb_strtolower(trim($request->kota)));
 
-        if (! $kota) {
-            return back()
-                ->withErrors(['kota' => 'Fotografer hanya melayani: ' . ($areas->implode(', ') ?: 'belum ada wilayah layanan') . '.'])
-                ->withInput();
-        }
-
-        // 2. Fotografer libur di tanggal itu
+        // 1. Fotografer libur di tanggal itu
         $libur = Schedule::where('photographer_id', $photographer->id)
             ->whereDate('date', $request->booking_date)
             ->exists();
@@ -77,7 +67,7 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // 3. Tanggal itu sudah dipesan (sudah diterima admin)
+        // 2. Tanggal itu sudah dipesan (sudah diterima admin)
         $sudahDipesan = Booking::where('photographer_id', $photographer->id)
             ->whereDate('booking_date', $request->booking_date)
             ->whereIn('status', ['diterima', 'confirmed'])
@@ -89,7 +79,7 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // 4. Hindari pesanan ganda dari pelanggan yang sama
+        // 3. Hindari pesanan ganda dari pelanggan yang sama
         $pesananGanda = Booking::where('user_id', auth()->id())
             ->where('photographer_id', $photographer->id)
             ->whereDate('booking_date', $request->booking_date)
@@ -107,7 +97,7 @@ class BookingController extends Controller
             'photographer_id' => $photographer->id,
             'package_id'      => $request->package_id,
             'booking_date'    => $request->booking_date,
-            'lokasi'          => trim($request->lokasi) . ', ' . $kota,
+            'lokasi'          => trim($request->lokasi),
             'status'          => 'pending',
         ]);
 
