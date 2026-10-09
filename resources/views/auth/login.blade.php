@@ -19,13 +19,6 @@
 
       @include('auth.partials.password', ['id' => 'password', 'name' => 'password', 'label' => 'Kata sandi'])
 
-      <!-- Checkbox Tampilkan Password -->
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="showPassword">
-        <label class="form-check-label" for="showPassword">
-          Tampilkan Kata Sandi
-        </label>
-      </div>
 
       <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" name="remember" id="remember"

@@ -63,10 +63,10 @@
             color: #fff;
         }
 
-        /* Header */
+        /* Header / Navbar Hijau */
         .site-nav {
-            background: #fff;
-            border-bottom: 1px solid #e3e7e5;
+            background: var(--brand);
+            border-bottom: 1px solid var(--brand-dark);
         }
 
         .logo {
@@ -74,7 +74,6 @@
             align-items: center;
             gap: .55rem;
             text-decoration: none;
-            color: var(--ink);
             font-size: 1.25rem;
             letter-spacing: -0.02em;
         }
@@ -82,28 +81,44 @@
         .logo-icon {
             width: 2rem;
             height: 2rem;
-            background: var(--brand);
+            background: #fff;
             border-radius: .55rem;
             display: grid;
             place-items: center;
         }
 
-        .logo b {
-            font-weight: 800;
+        .logo-icon svg {
+            stroke: var(--brand);
         }
 
+        /* Tulisan "Coco" dibuat hitam */
+        .logo b {
+            font-weight: 800;
+            color: #1c2321;
+        }
+
+        /* Tulisan "fonder" dibuat putih */
         .logo span {
             font-weight: 400;
-            color: var(--brand);
+            color: #ffffff;
         }
 
         .site-nav .nav-link {
             font-weight: 500;
-            color: #4a5551;
+            color: rgba(255, 255, 255, 0.85);
         }
 
-        .site-nav .nav-link:hover {
-            color: var(--brand);
+        .site-nav .nav-link:hover,
+        .site-nav .nav-link:focus {
+            color: #fff;
+        }
+
+        .site-nav .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .site-nav .navbar-toggler-icon {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
 
         /* Bar pencarian terpadu */
@@ -230,7 +245,7 @@
             font-size: .8rem;
         }
 
-        /* Tambahan: avatar foto profil pelanggan */
+        /* Avatar foto profil pelanggan */
         .profile-avatar {
             width: 2.6rem;
             height: 2.6rem;
@@ -248,7 +263,7 @@
             object-fit: cover;
         }
 
-        /* Tambahan: lingkaran hijau kecil untuk tanda tambah */
+        /* Lingkaran hijau kecil untuk tanda tambah */
         .profile-plus {
             position: absolute;
             right: -2px;
@@ -256,12 +271,12 @@
             width: 13px;
             height: 13px;
             border-radius: 50%;
-            background: var(--brand);
-            color: white;
+            background: #fff;
+            color: var(--brand);
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1.5px solid white;
+            border: 1.5px solid var(--brand);
             padding: 0;
         }
 
@@ -269,7 +284,7 @@
         .profile-plus::after {
             content: "";
             position: absolute;
-            background: white;
+            background: var(--brand);
             border-radius: 1px;
             top: 50%;
             left: 50%;
@@ -286,7 +301,7 @@
             height: 6px;
         }
 
-        /* Tambahan: tampilan area crop foto */
+        /* Tampilan area crop foto */
         .crop-container {
             max-width: 100%;
             max-height: 400px;
@@ -306,7 +321,7 @@
         <div class="container">
             <a class="logo" href="/">
                 <span class="logo-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
                         <circle cx="12" cy="13" r="3.5" />
                     </svg>
@@ -326,54 +341,36 @@
 
                 <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
                     @guest
-                    <a href="{{ route('login') }}" class="btn btn-brand-outline px-4">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn btn-brand px-4">Daftar</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-light px-4">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-light text-success fw-bold px-4">Daftar</a>
                     @else
 
                     {{-- Form upload foto profil --}}
                     <form action="{{ route('profile.photo') }}" method="POST" enctype="multipart/form-data" class="m-0">
                         @csrf
 
-                        {{-- Label dibuat seperti tombol avatar.
-             Jadi saat avatar diklik, file foto akan dipilih. --}}
                         <label for="profile-photo" class="profile-avatar">
-
                             @if (auth()->user()->photo)
-                            {{-- Kalau sudah punya foto, tampilkan foto tersebut --}}
-                            <img
-                                src="{{ asset('storage/' . auth()->user()->photo) }}"
-                                alt="Foto Profil">
+                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Foto Profil">
                             @else
-                            {{-- Kalau belum punya foto, tampilkan inisial nama --}}
                             <div class="avatar-fallback">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                             </div>
                             @endif
 
-                            {{-- Tambahan: tombol + untuk memilih foto --}}
                             <span class="profile-plus"></span>
-
                         </label>
 
-                        {{-- Input file disembunyikan karena user cukup klik avatar --}}
-                        <input
-                            type="file"
-                            name="photo"
-                            id="profile-photo"
-                            accept="image/*"
-                            style="display: none;">
-
+                        <input type="file" name="photo" id="profile-photo" accept="image/*" style="display: none;">
                     </form>
 
-                    {{-- Nama user yang sedang login --}}
-                    <span class="small fw-medium me-2">
+                    <span class="small fw-medium me-2 text-white">
                         {{ auth()->user()->name }}
                     </span>
 
-                    {{-- Tombol logout --}}
                     <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
-                        <button class="btn btn-brand-outline btn-sm px-3">
+                        <button class="btn btn-outline-light btn-sm px-3">
                             Keluar
                         </button>
                     </form>
@@ -396,7 +393,7 @@
 
     <footer class="site-footer text-center pb-4">&copy; 2026 Cocofonder</footer>
 
-    {{-- Tambahan: modal untuk crop foto --}}
+    {{-- Modal untuk crop foto --}}
     <div class="modal fade" id="cropModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -416,7 +413,6 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Batal
                     </button>
-
                     <button type="button" class="btn btn-brand" id="save-crop">
                         Simpan
                     </button>
@@ -427,94 +423,62 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    {{-- Tambahan: library untuk menjalankan crop foto --}}
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
-    {{-- Tambahan: proses pilih foto, crop, lalu kirim ke Laravel --}}
     <script>
         let cropper;
-
         const photoInput = document.getElementById('profile-photo');
         const cropImage = document.getElementById('crop-image');
         const cropModalEl = document.getElementById('cropModal');
         const cropModal = cropModalEl ? new bootstrap.Modal(cropModalEl) : null;
 
-        // Pengunjung yang belum login tidak punya form foto profil
         if (photoInput && cropImage && cropModal) {
+            photoInput.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
 
-        photoInput.addEventListener('change', function (event) {
+                const imageUrl = URL.createObjectURL(file);
+                cropImage.src = imageUrl;
+                cropModal.show();
 
-            const file = event.target.files[0];
+                cropImage.onload = function () {
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 1,
+                        responsive: true,
+                        background: false,
+                    });
+                };
+            });
 
-            if (!file) {
-                return;
-            }
+            document.getElementById('save-crop').addEventListener('click', function () {
+                if (!cropper) return;
 
-            const imageUrl = URL.createObjectURL(file);
+                cropper.getCroppedCanvas({
+                    width: 500,
+                    height: 500,
+                    imageSmoothingQuality: 'high'
+                }).toBlob(function (blob) {
+                    const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    photoInput.files = dataTransfer.files;
+                    cropModal.hide();
+                    photoInput.closest('form').submit();
+                }, 'image/jpeg', 0.9);
+            });
 
-            cropImage.src = imageUrl;
-
-            cropModal.show();
-
-            cropImage.onload = function () {
-
+            cropModalEl.addEventListener('hidden.bs.modal', function () {
                 if (cropper) {
                     cropper.destroy();
+                    cropper = null;
                 }
-
-                cropper = new Cropper(cropImage, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 1,
-                    responsive: true,
-                    background: false,
-                });
-
-            };
-
-        });
-
-        document.getElementById('save-crop').addEventListener('click', function () {
-
-            if (!cropper) {
-                return;
-            }
-
-            cropper.getCroppedCanvas({
-                width: 500,
-                height: 500,
-                imageSmoothingQuality: 'high'
-            }).toBlob(function (blob) {
-
-                const file = new File([blob], 'profile.jpg', {
-                    type: 'image/jpeg'
-                });
-
-                const dataTransfer = new DataTransfer();
-
-                dataTransfer.items.add(file);
-
-                photoInput.files = dataTransfer.files;
-
-                cropModal.hide();
-
-                photoInput.closest('form').submit();
-
-            }, 'image/jpeg', 0.9);
-
-        });
-
-        cropModalEl.addEventListener('hidden.bs.modal', function () {
-
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-
-        });
-
+            });
         }
     </script>
 

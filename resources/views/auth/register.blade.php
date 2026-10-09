@@ -26,32 +26,11 @@
         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
 
-      <div class="mb-3">
-        <label for="phone" class="form-label">Nomor telepon</label>
-        <input id="phone" type="text" name="phone" value="{{ old('phone') }}"
-               class="form-control @error('phone') is-invalid @enderror" required>
-        @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
-
-      <div class="mb-3">
-        <label for="address" class="form-label">Alamat</label>
-        <textarea id="address" name="address" rows="3"
-                  class="form-control @error('address') is-invalid @enderror" required>{{ old('address') }}</textarea>
-        @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
-
-      <div class="mb-3">
-        <label for="password" class="form-label">Kata sandi</label>
-        <input id="password" type="password" name="password"
-               class="form-control @error('password') is-invalid @enderror" required>
-        @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
-
-      <div class="mb-3">
-        <label for="password_confirmation" class="form-label">Ulangi kata sandi</label>
-        <input id="password_confirmation" type="password" name="password_confirmation"
-               class="form-control" required>
-      </div>
+      @include('auth.partials.password', [
+        'id' => 'password', 'name' => 'password', 'label' => 'Kata sandi',
+        'minlength' => 8, 'autocomplete' => 'new-password',
+      ])
+      <div class="form-text mb-3" style="margin-top:-0.5rem">Minimal 8 karakter, kombinasi huruf dan angka.</div>
 
       <button type="submit" class="btn btn-brand w-100">Daftar</button>
     </form>
@@ -62,19 +41,4 @@
 
   </div>
 </div>
-{{-- JavaScript buat hide and show password --}}
-<script>
-  const checkbox = document.getElementById('showPassword');
-  const passwordInput = document.getElementById('password');
-const confirmPasswordInput = document.getElementById('password_confirmation');
-
-  checkbox.addEventListener('change', function () {
-      // Tentukan tipe baru berdasarkan status checkbox
-      const type = this.checked ? 'text' : 'password';
-      
-      // Ubah tipe kedua input password
-      passwordInput.type = type;
-      confirmPasswordInput.type = type;
-  });
-</script>
 @endsection
