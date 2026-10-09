@@ -20,32 +20,71 @@
         }
 
         .navbar-profile {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e9ecef;
+            background-color: #11776F;
+            border-bottom: none;
             padding: 12px 0;
         }
 
-        .navbar-brand {
+        .navbar-profile .navbar-brand {
             font-weight: bold;
-            color: #198754 !important;
             font-size: 23px;
+            color: #ffffff !important;
+        }
+
+        .navbar-profile .navbar-brand i {
+            background-color: #ffffff;
+            color: #11776F;
+            padding: 8px;
+            border-radius: 8px;
+            margin-right: 5px;
+        }
+
+        .navbar-profile .navbar-brand .coco {
+            color: #111111;
+        }
+
+        .navbar-profile .navbar-brand .fonder {
+            color: #ffffff;
         }
 
         .navbar-profile .nav-link {
-            color: #333;
+            color: #ffffff;
             font-weight: 500;
             padding: 10px 15px;
             border-radius: 8px;
         }
 
         .navbar-profile .nav-link:hover {
-            color: #198754;
-            background-color: #f0f8f3;
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.12);
         }
 
         .navbar-profile .nav-link.active {
-            color: #198754;
-            background-color: #e8f5ed;
+            color: #ffffff;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+
+        .navbar-profile .dropdown-toggle {
+            color: #ffffff !important;
+        }
+
+        .navbar-profile .profile-initial {
+            background-color: #e0f2f1;
+            color: #087f75;
+        }
+
+        .navbar-profile .profile-avatar {
+            background-color: #e0f2f1;
+            color: #087f75;
+        }
+
+        .navbar-profile .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .navbar-profile .navbar-toggler-icon {
+            filter: brightness(0) invert(1);
         }
 
         .profile-avatar {
@@ -72,8 +111,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #198754;
-            color: white;
+            background-color: #e0f2f1;
+            color: #087f75;
             font-weight: bold;
             font-size: 13px;
             line-height: 1;
@@ -106,6 +145,8 @@
             display: inline-flex;
             justify-content: center;
             align-items: center;
+            background-color: #11776F;
+            color: #ffffff;
             border: 2px solid #fff;
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
         }
@@ -133,9 +174,10 @@
     <nav class="navbar navbar-expand-lg navbar-profile sticky-top">
         <div class="container">
 
-            <a class="navbar-brand" href="{{ route('landing') }}">
+            <a class="navbar-brand d-inline-flex align-items-center"
+                href="{{ route('landing') }}">
                 <i class="bi bi-camera-fill"></i>
-                Cocofonder
+                <span class="coco">Coco</span><span class="fonder">fonder</span>
             </a>
 
             <button class="navbar-toggler"
@@ -377,4 +419,4 @@
 
 </body>
 
-</html>yg mana
+</html>

@@ -1,4 +1,3 @@
-
 @extends('layouts.profil.app')
 
 @section('title', 'Profil Saya')
@@ -30,15 +29,15 @@
         height: 88px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #198754;
+        border: 2px solid #e0f2f1;
     }
 
     .profile-photo-fallback {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #198754;
-        color: white;
+        background: #e0f2f1;
+        color: #087f75;
         font-weight: bold;
         font-size: 22px;
     }
@@ -51,7 +50,7 @@
         height: 28px;
         border-radius: 50%;
         border: 2px solid white;
-        background: #198754;
+        background: #11776F;
         color: white;
         font-size: 22px;
         line-height: 20px;
@@ -62,7 +61,7 @@
     }
 
     .profile-plus:hover {
-        background: #157347;
+        background: #0d625b;
     }
 
     .profile-name {
@@ -90,7 +89,7 @@
     }
 
     .profile-info i {
-        color: #198754;
+        color: #11776F;
         font-size: 18px;
         width: 18px;
         margin-top: 13px;
@@ -113,13 +112,13 @@
         padding: 12px;
         border-radius: 9px;
         font-weight: 600;
-        background: #198754;
+        background: #11776F;
         color: #fff;
         border: none;
     }
 
     .btn-edit-profile:hover {
-        background: #157347;
+        background: #0d625b;
         color: #fff;
     }
 </style>
@@ -132,14 +131,14 @@
             <div class="profile-photo-wrapper">
 
                 @if (auth()->user()->photo)
-                    <img
-                        src="{{ asset('storage/' . auth()->user()->photo) }}"
-                        alt="Foto Profil"
-                        class="profile-photo">
+                <img
+                    src="{{ asset('storage/' . auth()->user()->photo) }}"
+                    alt="Foto Profil"
+                    class="profile-photo">
                 @else
-                    <div class="profile-photo profile-photo-fallback">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}
-                    </div>
+                <div class="profile-photo profile-photo-fallback">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
                 @endif
 
                 <button
@@ -223,7 +222,7 @@
 
         {{-- EDIT PROFIL --}}
         <a href="{{ route('profile.edit') }}"
-           class="btn btn-edit-profile">
+            class="btn btn-edit-profile">
             Edit Profil
         </a>
 
