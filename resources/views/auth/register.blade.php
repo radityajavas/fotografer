@@ -23,19 +23,6 @@
         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
 
-      <div class="mb-3">
-        <label for="phone" class="form-label">Nomor telepon</label>
-        <input id="phone" type="text" name="phone" value="{{ old('phone') }}"
-               class="form-control @error('phone') is-invalid @enderror" required>
-        @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
-
-      <div class="mb-3">
-        <label for="address" class="form-label">Alamat</label>
-        <textarea id="address" name="address" rows="3"
-                  class="form-control @error('address') is-invalid @enderror" required>{{ old('address') }}</textarea>
-        @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
 
       <div class="mb-3">
         <label for="password" class="form-label">Kata sandi</label>
@@ -50,6 +37,14 @@
                class="form-control" required>
       </div>
 
+      <!-- Checkbox Tampilkan Password -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="showPassword">
+        <label class="form-check-label" for="showPassword">
+          Tampilkan Kata Sandi
+        </label>
+      </div>
+
       <button type="submit" class="btn btn-brand">Daftar</button>
     </form>
 
@@ -59,4 +54,19 @@
 
   </div>
 </div>
+{{-- JavaScript buat hide and show password --}}
+<script>
+  const checkbox = document.getElementById('showPassword');
+  const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('password_confirmation');
+
+  checkbox.addEventListener('change', function () {
+      // Tentukan tipe baru berdasarkan status checkbox
+      const type = this.checked ? 'text' : 'password';
+      
+      // Ubah tipe kedua input password
+      passwordInput.type = type;
+      confirmPasswordInput.type = type;
+  });
+</script>
 @endsection
