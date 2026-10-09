@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,7 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\ProfileController;
 
 // 1. Auth
 Auth::routes();
@@ -38,15 +39,27 @@ Route::get('/photographer/detail', function () {
     return view('photographers.show');
 });
 
-// PROFIL
+
+// 3. Profil pengguna
 Route::middleware(['auth'])->group(function () {
 
-    // Upload foto profil pelanggan
+    // Halaman profil
+    Route::get('/profile', [ProfileController::class, 'index'])
+        ->name('profile');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::put('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    // Ganti foto profil dari halaman Profile
     Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])
         ->name('profile.photo');
 });
 
-// 3. Pelanggan
+
+// 4. Pelanggan
 Route::middleware(['auth'])->group(function () {
     Route::resource('booking', BookingController::class);
     Route::resource('pelanggan', PelangganController::class);
@@ -56,7 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/booking/{id}/chat', [ChatController::class, 'store'])->name('chat.store');
 });
 
-// 4. Admin (auth + admin)
+// 5. Admin (auth + admin)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -11,9 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {{-- Tambahan: library untuk crop foto --}}
-    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
-
     <style>
         :root {
             --brand: #0f766e;
@@ -91,13 +88,13 @@
             stroke: var(--brand);
         }
 
-        /* Tulisan "Coco" dibuat hitam */
+        /* Tulisan Coco hitam */
         .logo b {
             font-weight: 800;
             color: #1c2321;
         }
 
-        /* Tulisan "fonder" dibuat putih */
+        /* Tulisan fonder putih */
         .logo span {
             font-weight: 400;
             color: #ffffff;
@@ -245,13 +242,14 @@
             font-size: .8rem;
         }
 
-        /* Avatar foto profil pelanggan */
+        /* Foto profil di navbar */
         .profile-avatar {
             width: 2.6rem;
             height: 2.6rem;
             border-radius: 50%;
             position: relative;
             display: block;
+            object-fit: cover;
             cursor: pointer;
         }
 
@@ -262,56 +260,6 @@
             border-radius: 50%;
             object-fit: cover;
         }
-
-        /* Lingkaran hijau kecil untuk tanda tambah */
-        .profile-plus {
-            position: absolute;
-            right: -2px;
-            bottom: -2px;
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            background: #fff;
-            color: var(--brand);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1.5px solid var(--brand);
-            padding: 0;
-        }
-
-        .profile-plus::before,
-        .profile-plus::after {
-            content: "";
-            position: absolute;
-            background: var(--brand);
-            border-radius: 1px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .profile-plus::before {
-            width: 6px;
-            height: 1.5px;
-        }
-
-        .profile-plus::after {
-            width: 1.5px;
-            height: 6px;
-        }
-
-        /* Tampilan area crop foto */
-        .crop-container {
-            max-width: 100%;
-            max-height: 400px;
-            overflow: hidden;
-        }
-
-        .crop-container img {
-            display: block;
-            max-width: 100%;
-        }
     </style>
 </head>
 
@@ -319,6 +267,7 @@
 
     <nav class="navbar navbar-expand-md site-nav">
         <div class="container">
+
             <a class="logo" href="/">
                 <span class="logo-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -326,6 +275,7 @@
                         <circle cx="12" cy="13" r="3.5" />
                     </svg>
                 </span>
+
                 <div><b>Coco</b><span>fonder</span></div>
             </a>
 
@@ -334,153 +284,91 @@
             </button>
 
             <div class="collapse navbar-collapse" id="menu">
+
                 <ul class="navbar-nav ms-md-4 me-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('bookings.my') }}">Pesanan Saya</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Beranda</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('bookings.my') }}">Pesanan Saya</a>
+                    </li>
                 </ul>
 
                 <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+
                     @guest
-                    <a href="{{ route('login') }}" class="btn btn-outline-light px-4">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn btn-light text-success fw-bold px-4">Daftar</a>
+
+                        <a href="{{ route('login') }}" class="btn btn-outline-light px-4">
+                            Masuk
+                        </a>
+
+                        <a href="{{ route('register') }}" class="btn btn-light text-success fw-bold px-4">
+                            Daftar
+                        </a>
+
                     @else
 
-                    {{-- Form upload foto profil --}}
-                    <form action="{{ route('profile.photo') }}" method="POST" enctype="multipart/form-data" class="m-0">
-                        @csrf
+                        {{-- Foto profil: klik untuk menuju halaman Profile --}}
+                        <a href="{{ route('profile') }}"
+                           class="profile-avatar text-decoration-none"
+                           title="Profil Saya">
 
-                        <label for="profile-photo" class="profile-avatar">
                             @if (auth()->user()->photo)
-                            <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Foto Profil">
+                                <img
+                                    src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                    alt="Foto Profil"
+                                    class="profile-avatar">
                             @else
-                            <div class="avatar-fallback">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                            </div>
+                                <div class="avatar-fallback profile-avatar">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                </div>
                             @endif
 
-                            <span class="profile-plus"></span>
-                        </label>
+                        </a>
 
-                        <input type="file" name="photo" id="profile-photo" accept="image/*" style="display: none;">
-                    </form>
+                        <span class="small fw-medium me-2 text-white">
+                            {{ auth()->user()->name }}
+                        </span>
 
-                    <span class="small fw-medium me-2 text-white">
-                        {{ auth()->user()->name }}
-                    </span>
+                        <form action="{{ route('logout') }}" method="POST" class="m-0">
+                            @csrf
 
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                        @csrf
-                        <button class="btn btn-outline-light btn-sm px-3">
-                            Keluar
-                        </button>
-                    </form>
+                            <button type="submit" class="btn btn-outline-light btn-sm px-3">
+                                Keluar
+                            </button>
+                        </form>
 
                     @endguest
+
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="container py-4 py-md-5">
+
         @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
         @endif
+
         @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
         @endif
+
         @yield('content')
+
     </main>
 
-    <footer class="site-footer text-center pb-4">&copy; 2026 Cocofonder</footer>
-
-    {{-- Modal untuk crop foto --}}
-    <div class="modal fade" id="cropModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Atur Foto Profil</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="crop-container">
-                        <img id="crop-image" src="" alt="Crop Foto">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="button" class="btn btn-brand" id="save-crop">
-                        Simpan
-                    </button>
-                </div>
-
-            </div>
-        </div>
-    </div>
+    <footer class="site-footer text-center pb-4">
+        &copy; 2026 Cocofonder
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
-
-    <script>
-        let cropper;
-        const photoInput = document.getElementById('profile-photo');
-        const cropImage = document.getElementById('crop-image');
-        const cropModalEl = document.getElementById('cropModal');
-        const cropModal = cropModalEl ? new bootstrap.Modal(cropModalEl) : null;
-
-        if (photoInput && cropImage && cropModal) {
-            photoInput.addEventListener('change', function (event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const imageUrl = URL.createObjectURL(file);
-                cropImage.src = imageUrl;
-                cropModal.show();
-
-                cropImage.onload = function () {
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    cropper = new Cropper(cropImage, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        dragMode: 'move',
-                        autoCropArea: 1,
-                        responsive: true,
-                        background: false,
-                    });
-                };
-            });
-
-            document.getElementById('save-crop').addEventListener('click', function () {
-                if (!cropper) return;
-
-                cropper.getCroppedCanvas({
-                    width: 500,
-                    height: 500,
-                    imageSmoothingQuality: 'high'
-                }).toBlob(function (blob) {
-                    const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    photoInput.files = dataTransfer.files;
-                    cropModal.hide();
-                    photoInput.closest('form').submit();
-                }, 'image/jpeg', 0.9);
-            });
-
-            cropModalEl.addEventListener('hidden.bs.modal', function () {
-                if (cropper) {
-                    cropper.destroy();
-                    cropper = null;
-                }
-            });
-        }
-    </script>
 
     @stack('scripts')
 
