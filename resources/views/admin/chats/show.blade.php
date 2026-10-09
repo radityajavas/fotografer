@@ -11,7 +11,7 @@
       </span>
     </h3>
     <div class="card-actions">
-      <a href="{{ route('admin.chats.index') }}" class="btn btn-sm">Kembali</a>
+      <a href="{{ route('admin.chats.index') }}" class="btn btn-sm"><i class="ti ti-arrow-left me-1"></i>Kembali</a>
     </div>
   </div>
 
@@ -32,10 +32,18 @@
   </div>
 
   <div class="card-footer">
+    @include('chat._quick_replies', ['replies' => [
+      'Pesanan Anda sudah kami terima dan sedang diproses.',
+      'Mohon konfirmasi alamat lokasi pemotretan.',
+      'Fotografer akan menghubungi Anda H-1 sebelum acara.',
+      'Pembayaran Anda sudah kami terima. Terima kasih!',
+      'Mohon maaf, jadwal tidak tersedia. Silakan pilih tanggal lain.',
+    ]])
+
     <form method="POST" action="{{ route('admin.chats.store', $booking->id) }}" class="d-flex gap-2">
       @csrf
-      <input type="text" name="message" class="form-control" placeholder="Tulis balasan..." required autocomplete="off">
-      <button class="btn btn-primary">Kirim</button>
+      <input type="text" name="message" class="form-control" placeholder="Tulis balasan atau pilih di atas..." required maxlength="1000" autocomplete="off">
+      <button class="btn btn-primary"><i class="ti ti-send me-1"></i>Kirim</button>
     </form>
   </div>
 </div>

@@ -7,13 +7,15 @@
 <div class="mb-3">
   <label class="form-label">Telepon</label>
   <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror"
-         value="{{ old('phone', $photographer->phone ?? '') }}" required>
+         value="{{ old('phone', $photographer->phone ?? '') }}" required maxlength="20" inputmode="tel">
 </div>
 
 <div class="mb-3">
     <label class="form-label">Kota</label>
     <input type="text" name="city" class="form-control @error('city') is-invalid @enderror"
-         value="{{ old('city', $photographer->city ?? '') }}" required>
+         value="{{ old('city', $photographer->city ?? '') }}" required maxlength="100"
+         placeholder="Malang, Batu">
+    <div class="form-text">Wilayah yang dijangkau fotografer. Pisahkan dengan koma jika lebih dari satu kota.</div>
 </div>
 
 <div class="mb-3">

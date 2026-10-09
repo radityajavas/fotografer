@@ -4,25 +4,41 @@
 <div class="row justify-content-center">
   <div class="col-md-6 col-lg-5">
 
-    <h2 class="h4 mb-3">Daftar</h2>
+    <h2 class="h4 mb-1">Daftar</h2>
+    <p class="text-secondary small mb-3">Cukup isi tiga data di bawah untuk mulai memesan.</p>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" novalidate>
       @csrf
 
       <div class="mb-3">
         <label for="name" class="form-label">Nama lengkap</label>
         <input id="name" type="text" name="name" value="{{ old('name') }}"
-               class="form-control @error('name') is-invalid @enderror" required autofocus>
+               class="form-control @error('name') is-invalid @enderror"
+               required minlength="3" maxlength="100" autocomplete="name" autofocus>
         @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
 
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
         <input id="email" type="email" name="email" value="{{ old('email') }}"
-               class="form-control @error('email') is-invalid @enderror" required>
+               class="form-control @error('email') is-invalid @enderror"
+               required maxlength="255" autocomplete="email">
         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
 
+      <div class="mb-3">
+        <label for="phone" class="form-label">Nomor telepon</label>
+        <input id="phone" type="text" name="phone" value="{{ old('phone') }}"
+               class="form-control @error('phone') is-invalid @enderror" required>
+        @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+      </div>
+
+      <div class="mb-3">
+        <label for="address" class="form-label">Alamat</label>
+        <textarea id="address" name="address" rows="3"
+                  class="form-control @error('address') is-invalid @enderror" required>{{ old('address') }}</textarea>
+        @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
+      </div>
 
       <div class="mb-3">
         <label for="password" class="form-label">Kata sandi</label>
@@ -37,15 +53,7 @@
                class="form-control" required>
       </div>
 
-      <!-- Checkbox Tampilkan Password -->
-      <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" id="showPassword">
-        <label class="form-check-label" for="showPassword">
-          Tampilkan Kata Sandi
-        </label>
-      </div>
-
-      <button type="submit" class="btn btn-brand">Daftar</button>
+      <button type="submit" class="btn btn-brand w-100">Daftar</button>
     </form>
 
     <p class="mt-3 mb-0">

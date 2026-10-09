@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterController extends Controller
 {
@@ -32,7 +33,7 @@ class RegisterController extends Controller
 
     protected function create(array $data)
     {
-        $base = Str::slug(Str::before($data['email'], '@'), '');
+        $base = Str::slug(Str::before($data['email'], '@'), '') ?: 'user';
         $username = $base;
         $i = 1;
         while (User::where('username', $username)->exists()) {
@@ -49,7 +50,8 @@ class RegisterController extends Controller
 
         return $user;
     }
-        protected function registered(Request $request, $user)
+
+    protected function registered(Request $request, $user)
     {
         return redirect()->intended('/');
     }

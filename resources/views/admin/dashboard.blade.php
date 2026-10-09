@@ -4,24 +4,29 @@
 @section('content')
 <div class="row row-deck row-cards">
   @foreach ([
-    ['Booking', $totalBooking],
-    ['Pelanggan', $totalPelanggan],
-    ['Fotografer', $totalPhotographer],
-    ['Paket', $totalPackage],
-  ] as [$label, $total])
+    ['Booking',    $totalBooking,      'calendar-check', 'bg-blue-lt',   'admin.bookings.index'],
+    ['Pelanggan',  $totalPelanggan,    'users',          'bg-green-lt',  'admin.customers.index'],
+    ['Fotografer', $totalPhotographer, 'camera',         'bg-purple-lt', 'admin.photographers.index'],
+    ['Paket',      $totalPackage,      'package',        'bg-orange-lt', 'admin.packages.index'],
+  ] as [$label, $total, $icon, $tone, $link])
     <div class="col-sm-6 col-lg-3">
-      <div class="card">
+      <a href="{{ route($link) }}" class="card card-link text-decoration-none">
         <div class="card-body">
-          <div class="subheader">{{ $label }}</div>
-          <div class="h1 mb-0">{{ $total }}</div>
+          <div class="d-flex align-items-center">
+            <span class="avatar avatar-md {{ $tone }} me-3"><i class="ti ti-{{ $icon }} fs-2"></i></span>
+            <div>
+              <div class="subheader">{{ $label }}</div>
+              <div class="h1 mb-0">{{ $total }}</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
   @endforeach
 
   <div class="col-12">
     <div class="card">
-      <div class="card-header"><h3 class="card-title">Booking Terbaru</h3></div>
+      <div class="card-header"><h3 class="card-title"><i class="ti ti-clock me-2"></i>Booking Terbaru</h3></div>
       <div class="table-responsive">
         <table class="table table-vcenter card-table">
           <thead>

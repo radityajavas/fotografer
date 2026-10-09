@@ -6,22 +6,18 @@
 
     <h2 class="h4 mb-3">Masuk</h2>
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" novalidate>
       @csrf
 
       <div class="mb-3">
         <label for="email" class="form-label">Email atau username</label>
         <input id="email" type="text" name="email" value="{{ old('email') }}"
-          class="form-control @error('email') is-invalid @enderror" required autofocus>
+               class="form-control @error('email') is-invalid @enderror"
+               required maxlength="255" autocomplete="username" autofocus>
         @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
       </div>
 
-      <div class="mb-3">
-        <label for="password" class="form-label">Kata sandi</label>
-        <input id="password" type="password" name="password"
-          class="form-control @error('password') is-invalid @enderror" required>
-        @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
-      </div>
+      @include('auth.partials.password', ['id' => 'password', 'name' => 'password', 'label' => 'Kata sandi'])
 
       <!-- Checkbox Tampilkan Password -->
       <div class="form-check mb-3">
@@ -37,10 +33,10 @@
         <label class="form-check-label" for="remember">Ingat saya</label>
       </div>
 
-      <button type="submit" class="btn btn-brand">Masuk</button>
+      <button type="submit" class="btn btn-brand w-100">Masuk</button>
 
       @if (Route::has('password.request'))
-      <a href="{{ route('password.request') }}" class="ms-3">Lupa kata sandi?</a>
+        <div class="mt-3"><a href="{{ route('password.request') }}">Lupa kata sandi?</a></div>
       @endif
     </form>
 
@@ -50,15 +46,4 @@
 
   </div>
 </div>
-
-{{-- JavaScript untuk menampilkan password saat checkbox dicentang --}}
-<script>
-  const checkbox = document.getElementById('showPassword');
-  const passwordInput = document.getElementById('password');
-
-  checkbox.addEventListener('change', function() {
-    // Kalau dicentang jadi 'text', kalau tidak jadi 'password'
-    passwordInput.type = this.checked ? 'text' : 'password';
-  });
-</script>
 @endsection

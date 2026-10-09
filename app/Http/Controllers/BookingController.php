@@ -15,30 +15,59 @@ class BookingController extends Controller
     {
         $photographerId = $request->query('photographer_id');
         $selectedPhotographer = Photographer::find($photographerId);
-        $packages = Package::all();
 
-        $offDates = Schedule::where('photographer_id', $photographerId)
+        if (! $selectedPhotographer) {
+            return redirect()->route('landing')->with('error', 'Fotografer tidak ditemukan.');
+        }
+
+        $packages = Package::orderBy('price')->get();
+        $areas    = $selectedPhotographer->serviceAreas();
+
+        $offDates = Schedule::where('photographer_id', $selectedPhotographer->id)
             ->whereDate('date', '>=', today())
             ->orderBy('date')
             ->get()
             ->map(fn ($s) => $s->date->format('Y-m-d'))
             ->values();
 
-        return view('booking.create', compact('selectedPhotographer', 'packages', 'offDates'));
+        return view('booking.create', compact('selectedPhotographer', 'packages', 'offDates', 'areas'));
     }
 
     // Memproses simpan booking
     public function store(Request $request)
     {
         $request->validate([
-            'photographer_id' => 'required|exists:photographers,id',
-            'package_id'      => 'required|exists:packages,id',
-            'booking_date'    => 'required|date|after_or_equal:today',
-            'lokasi'          => 'required|string|max:500',
+            'photographer_id' => ['required', 'exists:photographers,id'],
+            'package_id'      => ['required', 'exists:packages,id'],
+            'booking_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . today()->addYears(2)->toDateString()],
+            'kota'            => ['required', 'string', 'max:100'],
+            'lokasi'          => ['required', 'string', 'min:10', 'max:400'],
+        ], [
+            'lokasi.min'                  => 'Alamat terlalu singkat, tulis minimal 10 karakter (jalan, nomor, patokan).',
+            'booking_date.before_or_equal' => 'Tanggal pelaksanaan maksimal 2 tahun dari sekarang.',
         ]);
 
-        // 1. Fotografer libur di tanggal itu
-        $libur = Schedule::where('photographer_id', $request->photographer_id)
+        $photographer = Photographer::findOrFail($request->photographer_id);
+
+        // 0. Fotografer harus sedang menerima pesanan
+        if (strtoupper($photographer->status) !== 'AVAILABLE') {
+            return back()
+                ->withErrors(['photographer_id' => 'Fotografer ini sedang tidak menerima pesanan.'])
+                ->withInput();
+        }
+
+        // 1. Lokasi hanya boleh di kota yang dijangkau fotografer
+        $areas = collect($photographer->serviceAreas());
+        $kota  = $areas->first(fn ($a) => mb_strtolower($a) === mb_strtolower(trim($request->kota)));
+
+        if (! $kota) {
+            return back()
+                ->withErrors(['kota' => 'Fotografer hanya melayani: ' . ($areas->implode(', ') ?: 'belum ada wilayah layanan') . '.'])
+                ->withInput();
+        }
+
+        // 2. Fotografer libur di tanggal itu
+        $libur = Schedule::where('photographer_id', $photographer->id)
             ->whereDate('date', $request->booking_date)
             ->exists();
 
@@ -48,8 +77,8 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // 2. Tanggal itu sudah dipesan (sudah diterima admin)
-        $sudahDipesan = Booking::where('photographer_id', $request->photographer_id)
+        // 3. Tanggal itu sudah dipesan (sudah diterima admin)
+        $sudahDipesan = Booking::where('photographer_id', $photographer->id)
             ->whereDate('booking_date', $request->booking_date)
             ->whereIn('status', ['diterima', 'confirmed'])
             ->exists();
@@ -60,12 +89,25 @@ class BookingController extends Controller
                 ->withInput();
         }
 
+        // 4. Hindari pesanan ganda dari pelanggan yang sama
+        $pesananGanda = Booking::where('user_id', auth()->id())
+            ->where('photographer_id', $photographer->id)
+            ->whereDate('booking_date', $request->booking_date)
+            ->whereIn('status', ['pending', 'diterima', 'confirmed'])
+            ->exists();
+
+        if ($pesananGanda) {
+            return back()
+                ->withErrors(['booking_date' => 'Kamu sudah punya pesanan dengan fotografer ini di tanggal yang sama.'])
+                ->withInput();
+        }
+
         Booking::create([
             'user_id'         => auth()->id(),
-            'photographer_id' => $request->photographer_id,
+            'photographer_id' => $photographer->id,
             'package_id'      => $request->package_id,
             'booking_date'    => $request->booking_date,
-            'lokasi'          => $request->lokasi,
+            'lokasi'          => trim($request->lokasi) . ', ' . $kota,
             'status'          => 'pending',
         ]);
 

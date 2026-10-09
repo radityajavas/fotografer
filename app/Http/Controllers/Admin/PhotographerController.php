@@ -16,13 +16,7 @@ class PhotographerController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'phone'          => 'required|string|max:50',
-            'specialization' => 'required|string|max:255',
-            'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
-            'city' => 'nullable|string|max:100',
-        ]);
+        $validated = $request->validate($this->rules(), $this->messages());
 
         Photographer::create($validated);
 
@@ -37,14 +31,7 @@ class PhotographerController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi disesuaikan: phone dibatasi hingga 50 karakter agar angka panjang tidak ditolak
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'phone'          => 'required|string|max:50',
-            'specialization' => 'required|string|max:255',
-            'status'         => 'required|in:AVAILABLE,UNAVAILABLE',
-            'city' => 'nullable|string|max:100',
-        ]);
+        $validated = $request->validate($this->rules(), $this->messages());
 
         $photographer = Photographer::findOrFail($id);
         $photographer->update($validated);
@@ -58,5 +45,23 @@ class PhotographerController extends Controller
         $photographer->delete();
 
         return redirect()->back()->with('success', 'Data fotografer berhasil dihapus!');
+    }
+
+    private function rules(): array
+    {
+        return [
+            'name'           => ['required', 'string', 'min:3', 'max:255'],
+            'phone'          => ['required', 'string', 'regex:/^\+?[0-9][0-9\s\-]{7,18}$/'],
+            'city'           => ['required', 'string', 'max:100'],
+            'specialization' => ['required', 'string', 'max:255'],
+            'status'         => ['required', 'in:AVAILABLE,UNAVAILABLE'],
+        ];
+    }
+
+    private function messages(): array
+    {
+        return [
+            'phone.regex' => 'Nomor telepon tidak valid. Gunakan angka saja, contoh: 081234567890.',
+        ];
     }
 }

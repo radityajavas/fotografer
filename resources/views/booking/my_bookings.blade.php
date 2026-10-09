@@ -33,7 +33,17 @@
           @php $s = strtolower($b->status); @endphp
           <tr>
             <td>{{ $b->photographer->name ?? '-' }}</td>
-            <td>{{ $b->package->name ?? '-' }}</td>
+            <td>
+              {{ $b->package->name ?? '-' }}
+              @if ($b->package)
+                <div class="small text-secondary">
+                  {{ $b->package->duration_hours }} jam &bull; Rp {{ number_format($b->package->price, 0, ',', '.') }}
+                </div>
+              @endif
+              @if (!empty($b->lokasi))
+                <div class="small text-secondary">{{ $b->lokasi }}</div>
+              @endif
+            </td>
             <td>{{ $b->booking_date ? \Carbon\Carbon::parse($b->booking_date)->format('d M Y') : '-' }}</td>
             <td>
               <span class="badge {{ $badge[$s][1] ?? 'text-bg-secondary' }}">

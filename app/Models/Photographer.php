@@ -17,4 +17,18 @@ class Photographer extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    /**
+     * Daftar kota yang dijangkau fotografer.
+     * Kolom `city` boleh berisi beberapa kota dipisah koma, mis. "Malang, Batu".
+     */
+    public function serviceAreas(): array
+    {
+        return collect(explode(',', (string) $this->city))
+            ->map(fn ($c) => trim($c))
+            ->filter()
+            ->unique(fn ($c) => mb_strtolower($c))
+            ->values()
+            ->all();
+    }
 }

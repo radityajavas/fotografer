@@ -37,13 +37,13 @@ class ChatController extends Controller
         $booking = Booking::findOrFail($id);
 
         $request->validate([
-            'message' => 'required|string|max:1000',
+            'message' => ['required', 'string', 'min:1', 'max:1000'],
         ]);
 
         Message::create([
             'booking_id' => $booking->id,
             'sender_id'  => auth()->id(),
-            'message'    => $request->message,
+            'message'    => trim($request->message),
         ]);
 
         return redirect()->back();

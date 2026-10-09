@@ -7,7 +7,7 @@
   <div class="card-header">
     <h3 class="card-title">Daftar Fotografer</h3>
     <div class="card-actions">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add">Tambah</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add"><i class="ti ti-plus me-1"></i>Tambah</button>
     </div>
   </div>
   <div class="table-responsive">
@@ -24,16 +24,16 @@
               <span class="badge {{ $p->status === 'AVAILABLE' ? 'bg-green-lt' : 'bg-red-lt' }}">{{ $p->status }}</span>
             </td>
             <td class="text-nowrap">
-              <a href="{{ route('admin.photographers.edit', $p->id) }}" class="btn btn-sm">Edit</a>
+              <a href="{{ route('admin.photographers.edit', $p->id) }}" class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil me-1"></i>Edit</a>
               <form action="{{ route('admin.photographers.destroy', $p->id) }}" method="POST" class="d-inline"
                     onsubmit="return confirm('Hapus fotografer ini?')">
                 @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash me-1"></i>Hapus</button>
               </form>
             </td>
           </tr>
         @empty
-          <tr><td colspan="5" class="text-center text-secondary">Belum ada data.</td></tr>
+          <tr><td colspan="6" class="text-center text-secondary">Belum ada data.</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -53,7 +53,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+        <button class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan</button>
       </div>
     </form>
   </div>
