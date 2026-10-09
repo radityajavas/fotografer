@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="card-footer text-end">
-      <button class="btn btn-primary">Simpan</button>
+      <button class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan</button>
     </div>
   </form>
 </div>
@@ -61,7 +61,7 @@
                 <form action="{{ route('admin.schedule.destroy', $s->id) }}" method="POST"
                       onsubmit="return confirm('Hapus tanggal ini?')">
                   @csrf @method('DELETE')
-                  <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                  <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash me-1"></i>Hapus</button>
                 </form>
               </div>
             </div>

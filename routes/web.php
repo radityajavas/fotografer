@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PhotographyController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PhotographerController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\ProfileController;
@@ -65,15 +65,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/chats/{id}', [AdminChatController::class, 'show'])->name('chats.show');
     Route::post('/chats/{id}', [AdminChatController::class, 'store'])->name('chats.store');
 
-    Route::get('/customers', function () {
-        $pelanggan = User::where('role', 'customer')->latest()->get();
-        return view('admin.customers', compact('pelanggan'));
-    })->name('customers.index');
-
-    Route::delete('/customers/{id}', function ($id) {
-        User::where('role', 'customer')->findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Pelanggan berhasil dihapus!');
-    })->name('customers.destroy');
+    Route::resource('customers', CustomerController::class)
+        ->only(['index', 'store', 'edit', 'update', 'destroy']);
 
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::patch('/bookings/{id}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.updateStatus');

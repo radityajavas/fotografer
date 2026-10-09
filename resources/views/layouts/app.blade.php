@@ -50,22 +50,23 @@
             box-shadow: none;
         }
 
-        .site-nav .btn-brand-outline {
-            background: var(--brand);
-            color: #fff;
-            border-color: var(--brand);
+        .btn-brand-outline {
+            background: transparent;
+            color: var(--brand);
+            border: 1.5px solid var(--brand);
+            font-weight: 600;
+            transition: background .15s, color .15s;
         }
 
-        .site-nav .btn-brand-outline:hover {
-            background: var(--brand-dark);
+        .btn-brand-outline:hover {
+            background: var(--brand);
             color: #fff;
-            border-color: var(--brand-dark);
         }
 
         /* Header */
         .site-nav {
-            background: #198754;
-            border-bottom: 1px solid #198754;
+            background: #fff;
+            border-bottom: 1px solid #e3e7e5;
         }
 
         .logo {
@@ -93,16 +94,16 @@
 
         .logo span {
             font-weight: 400;
-            color: #fff;
+            color: var(--brand);
         }
 
         .site-nav .nav-link {
             font-weight: 500;
-            color: #fff;
+            color: #4a5551;
         }
 
         .site-nav .nav-link:hover {
-            color: #fff;
+            color: var(--brand);
         }
 
         /* Bar pencarian terpadu */
@@ -365,7 +366,7 @@
                     </form>
 
                     {{-- Nama user yang sedang login --}}
-                    <span class="small fw-medium me-2 text-white">
+                    <span class="small fw-medium me-2">
                         {{ auth()->user()->name }}
                     </span>
 
@@ -384,6 +385,12 @@
     </nav>
 
     <main class="container py-4 py-md-5">
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
         @yield('content')
     </main>
 
@@ -430,9 +437,13 @@
 
         const photoInput = document.getElementById('profile-photo');
         const cropImage = document.getElementById('crop-image');
-        const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+        const cropModalEl = document.getElementById('cropModal');
+        const cropModal = cropModalEl ? new bootstrap.Modal(cropModalEl) : null;
 
-        photoInput.addEventListener('change', function(event) {
+        // Pengunjung yang belum login tidak punya form foto profil
+        if (photoInput && cropImage && cropModal) {
+
+        photoInput.addEventListener('change', function (event) {
 
             const file = event.target.files[0];
 
@@ -446,7 +457,7 @@
 
             cropModal.show();
 
-            cropImage.onload = function() {
+            cropImage.onload = function () {
 
                 if (cropper) {
                     cropper.destroy();
@@ -465,7 +476,7 @@
 
         });
 
-        document.getElementById('save-crop').addEventListener('click', function() {
+        document.getElementById('save-crop').addEventListener('click', function () {
 
             if (!cropper) {
                 return;
@@ -475,7 +486,7 @@
                 width: 500,
                 height: 500,
                 imageSmoothingQuality: 'high'
-            }).toBlob(function(blob) {
+            }).toBlob(function (blob) {
 
                 const file = new File([blob], 'profile.jpg', {
                     type: 'image/jpeg'
@@ -495,7 +506,7 @@
 
         });
 
-        document.getElementById('cropModal').addEventListener('hidden.bs.modal', function() {
+        cropModalEl.addEventListener('hidden.bs.modal', function () {
 
             if (cropper) {
                 cropper.destroy();
@@ -503,7 +514,11 @@
             }
 
         });
+
+        }
     </script>
+
+    @stack('scripts')
 
 </body>
 

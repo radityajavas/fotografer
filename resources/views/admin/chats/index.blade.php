@@ -17,7 +17,7 @@
               {{ \Carbon\Carbon::parse($b->messages_max_created_at)->diffForHumans() }}
             </td>
             <td>
-              <a href="{{ route('admin.chats.show', $b->id) }}" class="btn btn-sm btn-primary">Buka</a>
+              <a href="{{ route('admin.chats.show', $b->id) }}" class="btn btn-sm btn-primary"><i class="ti ti-message-circle me-1"></i>Buka</a>
             </td>
           </tr>
         @empty

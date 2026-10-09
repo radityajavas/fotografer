@@ -25,10 +25,18 @@
       @endforelse
     </div>
 
+    @include('chat._quick_replies', ['replies' => [
+      'Halo admin, apakah pesanan saya sudah dikonfirmasi?',
+      'Bisakah saya mengubah tanggal pemotretan?',
+      'Bagaimana cara pembayarannya?',
+      'Saya ingin membatalkan pesanan.',
+      'Terima kasih!',
+    ]])
+
     <form method="POST" action="{{ route('chat.store', $booking->id) }}" class="d-flex gap-2">
       @csrf
       <input type="text" name="message" class="form-control @error('message') is-invalid @enderror"
-             placeholder="Tulis pesan..." required autocomplete="off">
+             placeholder="Tulis pesan atau pilih di atas..." required maxlength="1000" autocomplete="off">
       <button class="btn btn-brand">Kirim</button>
     </form>
     @error('message') <div class="text-danger small mt-1">{{ $message }}</div> @enderror

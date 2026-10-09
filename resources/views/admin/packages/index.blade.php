@@ -6,7 +6,7 @@
   <div class="card-header">
     <h3 class="card-title">Daftar Paket Fotografi</h3>
     <div class="card-actions">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add">Tambah</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add"><i class="ti ti-plus me-1"></i>Tambah</button>
     </div>
   </div>
   <div class="table-responsive">
@@ -22,11 +22,11 @@
             <td>{{ $pkg->duration_hours }} jam</td>
             <td class="text-secondary">{{ \Illuminate\Support\Str::limit($pkg->description, 60) }}</td>
             <td class="text-nowrap">
-              <a href="{{ route('admin.packages.edit', $pkg->id) }}" class="btn btn-sm">Edit</a>
+              <a href="{{ route('admin.packages.edit', $pkg->id) }}" class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil me-1"></i>Edit</a>
               <form action="{{ route('admin.packages.destroy', $pkg->id) }}" method="POST" class="d-inline"
                     onsubmit="return confirm('Hapus paket ini?')">
                 @csrf @method('DELETE')
-                <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash me-1"></i>Hapus</button>
               </form>
             </td>
           </tr>
@@ -51,7 +51,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">Batal</button>
-        <button class="btn btn-primary">Simpan</button>
+        <button class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan</button>
       </div>
     </form>
   </div>

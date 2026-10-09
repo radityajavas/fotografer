@@ -58,7 +58,7 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Simpan perubahan</button>
+                    <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan perubahan</button>
                     <a href="{{ route('admin.photographers.index') }}" class="btn">Batal</a>
                 </div>
             </form>

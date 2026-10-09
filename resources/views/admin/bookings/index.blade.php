@@ -86,16 +86,16 @@
               <form action="{{ route('admin.bookings.updateStatus', $booking->id) }}" method="POST" class="d-inline">
                 @csrf @method('PATCH')
                 <input type="hidden" name="status" value="diterima">
-                <button type="submit" class="btn btn-success btn-sm" @disabled($s === 'diterima')>Setujui</button>
+                <button type="submit" class="btn btn-success btn-sm" @disabled($s === 'diterima')><i class="ti ti-check me-1"></i>Setujui</button>
               </form>
 
               <form action="{{ route('admin.bookings.updateStatus', $booking->id) }}" method="POST" class="d-inline">
                 @csrf @method('PATCH')
                 <input type="hidden" name="status" value="ditolak">
-                <button type="submit" class="btn btn-danger btn-sm" @disabled($s === 'ditolak')>Tolak</button>
+                <button type="submit" class="btn btn-danger btn-sm" @disabled($s === 'ditolak')><i class="ti ti-x me-1"></i>Tolak</button>
               </form>
 
-              <a href="{{ route('admin.chats.show', $booking->id) }}" class="btn btn-sm">Chat</a>
+              <a href="{{ route('admin.chats.show', $booking->id) }}" class="btn btn-sm btn-outline-secondary"><i class="ti ti-message-circle me-1"></i>Chat</a>
             </td>
           </tr>
         @empty
