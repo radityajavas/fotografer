@@ -1,203 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pesan Fotografer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --teal: #0f766e; --teal-dark: #0b5e57; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; padding: 32px 16px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #1f2937;
+            /* Ganti dengan gambar latar Anda, mis: url('{{ asset('images/bg.jpg') }}') center/cover fixed */
+            background: linear-gradient(135deg, #134e4a, #1f2937) fixed;
+            display: flex; justify-content: center; align-items: flex-start;
+        }
+        .card {
+            width: 100%; max-width: 546px; padding: 40px 48px; border-radius: 20px;
+            background: linear-gradient(135deg, #a7e3cf 0%, #d9eec2 30%, #3f9a85 65%, #2d5a47 100%);
+            box-shadow: 0 20px 50px rgba(0,0,0,.25);
+        }
+        h1 { margin: 0 0 20px; font-size: 26px; }
+        label { display: block; margin: 16px 0 6px; font-weight: 700; font-size: 16px; }
+        input, select, textarea {
+            width: 100%; padding: 11px 14px; font: inherit; font-size: 15px;
+            border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827;
+        }
+        input[readonly] { background: #f3f4f6; }
+        textarea { min-height: 92px; resize: vertical; }
+        .hint { margin-top: 6px; font-size: 14px; color: #1f2937; }
+        .hint.warn { color: #7f1d1d; font-weight: 600; }
+        .alert { background: #fee2e2; color: #991b1b; padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+        .actions { display: flex; gap: 8px; margin-top: 22px; }
+        .btn { padding: 12px 16px; border: 0; border-radius: 8px; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; text-decoration: none; text-align: center; }
+        .btn-primary { flex: 1; background: var(--teal); color: #fff; }
+        .btn-primary:hover { background: var(--teal-dark); }
+        .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+        .btn-cancel { background: #6b7280; color: #fff; }
+        @media (max-width: 480px) { .card { padding: 28px 22px; } }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>Pesan fotografer</h1>
 
-@extends('layouts.app')
+    @if ($errors->any())
+        @foreach ($errors->all() as $error)
+            <div class="alert">{{ $error }}</div>
+        @endforeach
+    @endif
 
-@section('content')
+    @if (session('error'))
+        <div class="alert">{{ session('error') }}</div>
+    @endif
 
-<style>
-    body {
-        background:
-            linear-gradient(
-                rgba(255, 255, 255, 0.65),
-                rgba(255, 255, 255, 0.65)
-            ),
-            url('{{ asset('images/foto.jpg') }}') center/cover fixed no-repeat;
-    }
-</style>
+    <form method="POST" action="{{ Route::has('booking.store') ? route('booking.store') : url('/booking') }}" id="bookingForm">
+        @csrf
+        <input type="hidden" name="photographer_id" value="{{ $selectedPhotographer->id }}">
 
-@php
-    $offDates = $offDates ?? collect();
+        <label>Fotografer</label>
+        <input type="text" value="{{ $selectedPhotographer->name }}" readonly>
+        @if (!empty($areas))
+            <div class="hint">Area layanan: {{ implode(', ', $areas) }}</div>
+        @endif
 
-    // Format tanggal libur menjadi YYYY-MM-DD
-    $offDateList = collect($offDates)
-        ->map(fn ($d) => \Carbon\Carbon::parse($d)->format('Y-m-d'))
-        ->values()
-        ->all();
-@endphp
+        <label for="package_id">Paket</label>
+        <select name="package_id" id="package_id" required>
+            <option value="">Pilih paket</option>
+            @foreach ($packages as $package)
+                <option value="{{ $package->id }}"
+                        data-duration="{{ $package->duration_hours }}"
+                        {{ old('package_id') == $package->id ? 'selected' : '' }}>
+                    {{ $package->name }} - Rp{{ number_format($package->price, 0, ',', '.') }} ({{ $package->duration_hours }} jam)
+                </option>
+            @endforeach
+        </select>
 
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+        <label for="booking_date">Tanggal pelaksanaan</label>
+        <input type="date" name="booking_date" id="booking_date"
+               min="{{ today()->toDateString() }}" max="{{ today()->addYears(2)->toDateString() }}"
+               value="{{ old('booking_date') }}" required>
+        @if (count($offDates))
+            <div class="hint">Libur seharian: {{ collect($offDates)->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M Y'))->implode(', ') }}</div>
+        @endif
+        <div class="hint warn" id="dateWarn" style="display:none"></div>
+        <div class="hint" id="blockInfo" style="display:none"></div>
 
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5"
-             style="background: linear-gradient(135deg, #A8E6CF 0%, #DCEDC1 35%, #56AB91 70%, #234E39 100%);">
+        <label for="start_time">Jam mulai</label>
+        <select name="start_time" id="start_time" required>
+            <option value="">Pilih paket dulu</option>
+        </select>
+        <div class="hint" id="endInfo">Jam operasional 08.00–20.00.</div>
 
-            <h2 class="h4 mb-4 text-dark fw-bold">
-                Pesan fotografer
-            </h2>
+        <label for="lokasi">Alamat / lokasi pemotretan</label>
+        <textarea name="lokasi" id="lokasi" required minlength="10" maxlength="400">{{ old('lokasi') }}</textarea>
 
-            <form action="{{ route('booking.store') }}"
-                  method="POST"
-                  id="bookingForm">
-                @csrf
-
-                {{-- FOTOGRAFER --}}
-                <div class="mb-3">
-                    <label class="form-label fw-bold text-dark">
-                        Fotografer
-                    </label>
-
-                    <input type="hidden"
-                           name="photographer_id"
-                           value="{{ old('photographer_id', $selectedPhotographer->id ?? '') }}">
-
-                    <input type="text"
-                           class="form-control bg-white text-dark"
-                           value="{{ $selectedPhotographer->name ?? 'Fotografer tidak ditemukan' }}"
-                           readonly>
-
-                    @error('photographer_id')
-                        <div class="text-danger small mt-1">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                {{-- PAKET --}}
-                <div class="mb-3">
-                    <label for="package_id" class="form-label fw-bold text-dark">
-                        Paket
-                    </label>
-
-                    <select name="package_id"
-                            id="package_id"
-                            class="form-select bg-white text-dark @error('package_id') is-invalid @enderror"
-                            required>
-                        <option value="">Pilih paket</option>
-
-                        @foreach ($packages as $pkg)
-                            <option value="{{ $pkg->id }}"
-                                @selected(old('package_id') == $pkg->id)>
-                                {{ $pkg->name }} -
-                                Rp{{ number_format($pkg->price ?? 0, 0, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    @error('package_id')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                {{-- TANGGAL --}}
-                <div class="mb-3">
-                    <label for="booking_date" class="form-label fw-bold text-dark">
-                        Tanggal pelaksanaan
-                    </label>
-
-                    <input type="date"
-                           name="booking_date"
-                           id="booking_date"
-                           value="{{ old('booking_date') }}"
-                           min="{{ date('Y-m-d') }}"
-                           class="form-control bg-white text-dark @error('booking_date') is-invalid @enderror"
-                           required>
-
-                    <div class="invalid-feedback" id="date-warning">
-                        @error('booking_date')
-                            {{ $message }}
-                        @enderror
-                    </div>
-
-                    @if (count($offDateList) > 0)
-                        <div class="form-text text-dark mt-1">
-                            Tanggal libur fotografer:
-                            {{ collect($offDateList)->map(fn ($d) => \Carbon\Carbon::parse($d)->format('d M Y'))->implode(', ') }}
-                        </div>
-                    @endif
-                </div>
-
-                
-
-                {{-- LOKASI --}}
-                <div class="mb-3">
-                    <label for="lokasi" class="form-label fw-bold text-dark">
-                        Alamat / lokasi pemotretan
-                    </label>
-
-                    <textarea name="lokasi"
-                              id="lokasi"
-                              rows="3"
-                              class="form-control bg-white text-dark @error('lokasi') is-invalid @enderror"
-                              required>{{ old('lokasi') }}</textarea>
-
-                    @error('lokasi')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-
-                {{-- TOMBOL --}}
-                <div class="d-flex align-items-center gap-2 mt-4">
-                    <button type="submit"
-                            class="btn btn-brand flex-grow-1">
-                        Konfirmasi booking
-                    </button>
-
-                    <a href="{{ route('landing') }}"
-                       class="btn btn-secondary">
-                        Batal
-                    </a>
-                </div>
-
-            </form>
+        <div class="actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Konfirmasi booking</button>
+            <a href="{{ url()->previous() }}" class="btn btn-cancel">Batal</a>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const offDates = @json($offDateList);
-        const dateInput = document.getElementById('booking_date');
-        const warning = document.getElementById('date-warning');
-        const form = document.getElementById('bookingForm');
+    const OPEN = 8 * 60, CLOSE = 20 * 60, STEP = 30;
+    const offDates  = @json($offDates);
+    const offBlocks = @json($offBlocks ?? []);
+    const oldStart  = @json(old('start_time'));
 
-        function validasiTanggal() {
-            const tanggalDipilih = dateInput.value;
-            const tanggalLibur = offDates.includes(tanggalDipilih);
+    const pkg = document.getElementById('package_id');
+    const dateEl = document.getElementById('booking_date');
+    const startEl = document.getElementById('start_time');
+    const endInfo = document.getElementById('endInfo');
+    const dateWarn = document.getElementById('dateWarn');
+    const blockInfo = document.getElementById('blockInfo');
+    const submitBtn = document.getElementById('submitBtn');
 
-            if (tanggalLibur) {
-                dateInput.classList.add('is-invalid');
-                dateInput.setCustomValidity(
-                    'Fotografer tidak tersedia pada tanggal ini.'
-                );
-                warning.textContent =
-                    'Fotografer tidak tersedia pada tanggal ini.';
-                return false;
-            }
+    const fmt = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const duration = () => parseInt(pkg.selectedOptions[0]?.dataset.duration || 0, 10);
 
-            dateInput.classList.remove('is-invalid');
-            dateInput.setCustomValidity('');
-            warning.textContent = '';
-            return true;
+    function buildStartOptions(keep) {
+        const d = duration();
+        startEl.innerHTML = '';
+        if (!d) { startEl.innerHTML = '<option value="">Pilih paket dulu</option>'; return; }
+        startEl.insertAdjacentHTML('beforeend', '<option value="">Pilih jam mulai</option>');
+        for (let m = OPEN; m + d * 60 <= CLOSE; m += STEP) {
+            const sel = keep && keep === fmt(m) ? ' selected' : '';
+            startEl.insertAdjacentHTML('beforeend', `<option value="${fmt(m)}"${sel}>${fmt(m).replace(':', '.')}</option>`);
         }
-
-        dateInput.addEventListener('change', validasiTanggal);
-        dateInput.addEventListener('input', validasiTanggal);
-
-        form.addEventListener('submit', function (event) {
-            if (!validasiTanggal()) {
-                event.preventDefault();
-                dateInput.reportValidity();
-            }
-        });
-
-        // Periksa kembali tanggal jika form dikembalikan dengan error.
-        if (dateInput.value) {
-            validasiTanggal();
+        if (startEl.options.length === 1) {
+            startEl.innerHTML = '<option value="">Tidak ada jam yang muat (maks. selesai 20.00)</option>';
         }
-    });
+    }
+
+    function updateEnd() {
+        const d = duration();
+        if (startEl.value && d) {
+            const e = toMin(startEl.value) + d * 60;
+            endInfo.textContent = `Selesai pukul ${fmt(e).replace(':', '.')} (durasi ${d} jam).`;
+        } else {
+            endInfo.textContent = 'Jam operasional 08.00–20.00.';
+        }
+    }
+
+    function checkDate() {
+        const v = dateEl.value;
+        dateWarn.style.display = 'none';
+        blockInfo.style.display = 'none';
+        submitBtn.disabled = false;
+        if (!v) return;
+        if (offDates.includes(v)) {
+            dateWarn.textContent = 'Fotografer libur seharian pada tanggal ini. Pilih tanggal lain.';
+            dateWarn.style.display = 'block';
+            submitBtn.disabled = true;
+            return;
+        }
+        if (offBlocks[v] && offBlocks[v].length) {
+            blockInfo.textContent = 'Tidak tersedia pada jam: ' + offBlocks[v].join(', ').replaceAll(':', '.');
+            blockInfo.style.display = 'block';
+        }
+    }
+
+    pkg.addEventListener('change', () => { buildStartOptions(); updateEnd(); });
+    startEl.addEventListener('change', updateEnd);
+    dateEl.addEventListener('change', checkDate);
+
+    buildStartOptions(oldStart);
+    updateEnd();
+    checkDate();
 </script>
-
-@endsection
+</body>
+</html>

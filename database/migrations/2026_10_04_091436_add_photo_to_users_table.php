@@ -8,22 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-
-            // Menambahkan kolom "photo" untuk menyimpan nama/path foto profil
-            // nullable() = boleh kosong kalau pelanggan belum upload foto
-            $table->string('photo')->nullable()->after('address');
-
-        });
+        // Lewati jika kolom "photo" sudah ada (mis. pernah ditambah manual lewat phpMyAdmin)
+        if (! Schema::hasColumn('users', 'photo')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('photo')->nullable()->after('address');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-
-            // Kalau migration dibatalkan, kolom "photo" ikut dihapus
-            $table->dropColumn('photo');
-
-        });
+        if (Schema::hasColumn('users', 'photo')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('photo');
+            });
+        }
     }
 };

@@ -89,7 +89,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');
     Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
+    Route::patch('/schedule/{id}', [ScheduleController::class, 'update'])->name('schedule.update');
     Route::delete('/schedule/{id}', [ScheduleController::class, 'destroy'])->name('schedule.destroy');
+    Route::patch('/schedule/booking/{id}/confirm', [ScheduleController::class, 'confirm'])->name('schedule.confirm');
 
     Route::resource('photographers', PhotographerController::class)
         ->only(['index', 'store', 'edit', 'update', 'destroy']);
