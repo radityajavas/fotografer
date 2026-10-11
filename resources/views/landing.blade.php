@@ -36,6 +36,7 @@
                         $chips = array_filter(array_map('trim', explode(',', $item->specialization ?? '')));
                         $foto  = $item->photo ?? null;
                         $hasil = $item->photos->take(3);
+                        $info  = trim(($item->specialization ?? '') . ($item->city ? ' • ' . $item->city : ''));
                     @endphp
                     <tr>
                         <td>
@@ -46,7 +47,7 @@
                                     <div class="avatar avatar-fallback">{{ substr($item->name, 0, 2) }}</div>
                                 @endif
                                 <div>
-                                    <a href="{{ route('photographers.show', $item->id) }}" class="fw-semibold text-decoration-none text-reset">{{ $item->name }}</a>
+                                    <div class="fw-semibold">{{ $item->name }}</div>
                                     <div class="small text-secondary">
                                         {{ $item->phone }}@if ($item->city) &bull; {{ $item->city }}@endif
                                     </div>
@@ -66,7 +67,8 @@
                             @if ($hasil->isEmpty())
                                 <span class="text-secondary small">Belum ada foto</span>
                             @else
-                                <a href="{{ route('photographers.show', $item->id) }}" class="d-flex align-items-center text-decoration-none">
+                                <button type="button" class="border-0 bg-transparent p-0 d-flex align-items-center"
+                                        data-galeri="{{ $item->id }}" data-nama="{{ $item->name }}" data-info="{{ $info }}">
                                     @foreach ($hasil as $p)
                                         <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
                                              style="width:52px;height:52px;object-fit:cover;border-radius:6px;margin-right:6px">
@@ -74,7 +76,7 @@
                                     @if ($item->photos->count() > 3)
                                         <span class="small text-secondary">+{{ $item->photos->count() - 3 }}</span>
                                     @endif
-                                </a>
+                                </button>
                             @endif
                         </td>
 
@@ -87,7 +89,10 @@
                         </td>
 
                         <td class="text-end" style="white-space:nowrap">
-                            <a href="{{ route('photographers.show', $item->id) }}" class="btn btn-outline-secondary btn-sm px-3">Lihat</a>
+                            @if ($item->photos->isNotEmpty())
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-3"
+                                        data-galeri="{{ $item->id }}" data-nama="{{ $item->name }}" data-info="{{ $info }}">Lihat foto</button>
+                            @endif
                             @if ($item->status == 'AVAILABLE')
                                 <a href="{{ route('booking.create', ['photographer_id' => $item->id]) }}"
                                    class="btn btn-brand btn-sm px-3">Pesan</a>
@@ -105,5 +110,84 @@
         </table>
     </div>
 </div>
+
+{{-- isi galeri tiap fotografer, dipakai oleh popup --}}
+@foreach ($photographers as $item)
+    @if ($item->photos->isNotEmpty())
+        <template id="galeri-{{ $item->id }}">
+            <div class="row g-2">
+                @foreach ($item->photos as $p)
+                    <div class="col-6 col-md-4">
+                        <a href="{{ $p->url }}" target="_blank">
+                            <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
+                                 style="width:100%;height:180px;object-fit:cover;border-radius:6px">
+                        </a>
+                        @if ($p->kategori)
+                            <div class="small text-secondary mt-1">{{ $p->kategori }}</div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </template>
+    @endif
+@endforeach
+
+<div class="modal fade" id="modalGaleri" tabindex="-1" role="dialog" aria-hidden="true" style="background: rgba(0,0,0,.4)">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="galeriJudul"></h5>
+                    <div class="small text-secondary" id="galeriInfo"></div>
+                </div>
+                <button type="button" class="btn-close" data-tutup aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="galeriIsi"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('modalGaleri');
+        var isi = document.getElementById('galeriIsi');
+        var backdrop = null;
+
+        function buka(btn) {
+            var tpl = document.getElementById('galeri-' + btn.dataset.galeri);
+            if (!tpl) return;
+            document.getElementById('galeriJudul').textContent = btn.dataset.nama;
+            document.getElementById('galeriInfo').textContent = btn.dataset.info || '';
+            isi.innerHTML = '';
+            isi.appendChild(tpl.content.cloneNode(true));
+
+            document.body.appendChild(modal);
+            backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            backdrop.style.background = 'transparent';
+            document.body.appendChild(backdrop);
+            modal.style.display = 'block';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function tutup() {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            if (backdrop) { backdrop.remove(); backdrop = null; }
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('[data-galeri]').forEach(function (b) {
+            b.addEventListener('click', function () { buka(b); });
+        });
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal || e.target.hasAttribute('data-tutup')) tutup();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && backdrop) tutup();
+        });
+    })();
+</script>
 
 @endsection

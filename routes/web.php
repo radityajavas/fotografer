@@ -9,7 +9,6 @@ use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\PhotographerProfileController;
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PhotographerController;
@@ -37,8 +36,9 @@ Route::get('/home', function () {
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
 
-// Detail fotografer + hasil foto
-Route::get('/photographers/{id}', [PhotographerProfileController::class, 'show'])->name('photographers.show');
+Route::get('/photographer/detail', function () {
+    return view('photographers.show');
+});
 
 
 // 3. Profil pengguna
