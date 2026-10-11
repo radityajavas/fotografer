@@ -9,9 +9,11 @@ use App\Http\Controllers\PhotographyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\PhotographerProfileController;
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PhotographerController;
+use App\Http\Controllers\Admin\PhotographerPhotoController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -35,9 +37,8 @@ Route::get('/home', function () {
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
 
-Route::get('/photographer/detail', function () {
-    return view('photographers.show');
-});
+// Detail fotografer + hasil foto
+Route::get('/photographers/{id}', [PhotographerProfileController::class, 'show'])->name('photographers.show');
 
 
 // 3. Profil pengguna
@@ -95,6 +96,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('photographers', PhotographerController::class)
         ->only(['index', 'store', 'edit', 'update', 'destroy']);
+
+    // Hasil foto fotografer
+    Route::get('/photographers/{id}/photos', [PhotographerPhotoController::class, 'index'])->name('photographers.photos');
+    Route::post('/photographers/{id}/photos', [PhotographerPhotoController::class, 'store'])->name('photographers.photos.store');
+    Route::delete('/photos/{id}', [PhotographerPhotoController::class, 'destroy'])->name('photos.destroy');
+
     Route::resource('packages', PackageController::class)
         ->only(['index', 'store', 'edit', 'update', 'destroy']);
 });

@@ -24,6 +24,7 @@
               <span class="badge {{ $p->status === 'AVAILABLE' ? 'bg-green-lt' : 'bg-red-lt' }}">{{ $p->status }}</span>
             </td>
             <td class="text-nowrap">
+              <a href="{{ route('admin.photographers.photos', $p->id) }}" class="btn btn-sm btn-outline-secondary"><i class="ti ti-photo me-1"></i>Foto</a>
               <a href="{{ route('admin.photographers.edit', $p->id) }}" class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil me-1"></i>Edit</a>
               <form action="{{ route('admin.photographers.destroy', $p->id) }}" method="POST" class="d-inline"
                     onsubmit="return confirm('Hapus fotografer ini?')">

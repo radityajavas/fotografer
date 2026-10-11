@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Photographer extends Model
 {
@@ -16,6 +17,20 @@ class Photographer extends Model
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function photos()
+    {
+        return $this->hasMany(PhotographerPhoto::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($photographer) {
+            foreach ($photographer->photos as $photo) {
+                Storage::disk('public')->delete($photo->path);
+            }
+        });
     }
 
     /**

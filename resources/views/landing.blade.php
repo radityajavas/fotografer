@@ -25,6 +25,7 @@
                 <tr>
                     <th>Fotografer</th>
                     <th>Spesialisasi</th>
+                    <th>Hasil Foto</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -34,6 +35,7 @@
                     @php
                         $chips = array_filter(array_map('trim', explode(',', $item->specialization ?? '')));
                         $foto  = $item->photo ?? null;
+                        $hasil = $item->photos->take(3);
                     @endphp
                     <tr>
                         <td>
@@ -44,7 +46,7 @@
                                     <div class="avatar avatar-fallback">{{ substr($item->name, 0, 2) }}</div>
                                 @endif
                                 <div>
-                                    <div class="fw-semibold">{{ $item->name }}</div>
+                                    <a href="{{ route('photographers.show', $item->id) }}" class="fw-semibold text-decoration-none text-reset">{{ $item->name }}</a>
                                     <div class="small text-secondary">
                                         {{ $item->phone }}@if ($item->city) &bull; {{ $item->city }}@endif
                                     </div>
@@ -61,6 +63,22 @@
                         </td>
 
                         <td>
+                            @if ($hasil->isEmpty())
+                                <span class="text-secondary small">Belum ada foto</span>
+                            @else
+                                <a href="{{ route('photographers.show', $item->id) }}" class="d-flex align-items-center text-decoration-none">
+                                    @foreach ($hasil as $p)
+                                        <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
+                                             style="width:52px;height:52px;object-fit:cover;border-radius:6px;margin-right:6px">
+                                    @endforeach
+                                    @if ($item->photos->count() > 3)
+                                        <span class="small text-secondary">+{{ $item->photos->count() - 3 }}</span>
+                                    @endif
+                                </a>
+                            @endif
+                        </td>
+
+                        <td>
                             @if ($item->status == 'AVAILABLE')
                                 <span class="badge rounded-pill text-bg-success fw-medium">Tersedia</span>
                             @else
@@ -68,7 +86,8 @@
                             @endif
                         </td>
 
-                        <td class="text-end">
+                        <td class="text-end" style="white-space:nowrap">
+                            <a href="{{ route('photographers.show', $item->id) }}" class="btn btn-outline-secondary btn-sm px-3">Lihat</a>
                             @if ($item->status == 'AVAILABLE')
                                 <a href="{{ route('booking.create', ['photographer_id' => $item->id]) }}"
                                    class="btn btn-brand btn-sm px-3">Pesan</a>
@@ -79,7 +98,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center text-secondary py-5">Belum ada fotografer.</td>
+                        <td colspan="5" class="text-center text-secondary py-5">Belum ada fotografer.</td>
                     </tr>
                 @endforelse
             </tbody>

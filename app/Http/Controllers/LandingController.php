@@ -10,14 +10,14 @@ class LandingController extends Controller
     public function index()
     {
         return view('landing', [
-            'photographers' => Photographer::all(),
+            'photographers' => Photographer::with(['photos' => fn ($q) => $q->latest()])->get(),
             'categories'    => $this->categories(),
         ]);
     }
 
     public function cari(Request $request)
     {
-        $photographers = Photographer::all();
+        $photographers = Photographer::with(['photos' => fn ($q) => $q->latest()])->get();
 
         if ($request->filled('lokasi')) {
             $lokasi = mb_strtolower(trim($request->lokasi));
