@@ -11,8 +11,7 @@
         body {
             margin: 0; min-height: 100vh; padding: 32px 16px;
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #1f2937;
-            /* Ganti dengan gambar latar Anda, mis: url('{{ asset('images/bg.jpg') }}') center/cover fixed */
-            background: linear-gradient(135deg, #134e4a, #1f2937) fixed;
+            background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.35)), url('{{ asset('images/foto.jpg') }}') center / cover fixed;
             display: flex; justify-content: center; align-items: flex-start;
         }
         .card {
