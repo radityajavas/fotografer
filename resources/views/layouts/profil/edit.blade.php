@@ -99,16 +99,6 @@
                     }
                 </script>
 
-                <div class="mb-3">
-                    <label for="address" class="form-label">Alamat</label>
-                    <textarea
-                        id="address"
-                        name="address"
-                        class="form-control"
-                        rows="3"
-                        placeholder="Masukkan alamat">{{ old('address', $user->address ?? '') }}</textarea>
-                </div>
-
                 <div class="mb-4">
                     <label for="photo" class="form-label">Ganti Foto Profil</label>
                     <input

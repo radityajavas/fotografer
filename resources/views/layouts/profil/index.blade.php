@@ -209,17 +209,6 @@
             </div>
         </div>
 
-        {{-- ALAMAT --}}
-        <div class="profile-info">
-            <i class="bi bi-geo-alt"></i>
-            <div>
-                <div class="profile-info-label">Alamat</div>
-                <div class="profile-info-value">
-                    {{ auth()->user()->address ?? '-' }}
-                </div>
-            </div>
-        </div>
-
         {{-- EDIT PROFIL --}}
         <a href="{{ route('profile.edit') }}"
             class="btn btn-edit-profile">
