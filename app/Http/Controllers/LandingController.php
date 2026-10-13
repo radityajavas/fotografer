@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Photographer;
 use Illuminate\Http\Request;
+use App\Models\Package;
 
 class LandingController extends Controller
 {
     public function index()
     {
         return view('landing', [
-            'photographers' => Photographer::with(['photos' => fn ($q) => $q->latest()])->get(),
-            'categories'    => $this->categories(),
+        'packages'      => Package::all(),
+        'photographers' => Photographer::with(['photos' => fn ($q) => $q->latest()])->get(),
+        'categories'    => $this->categories(),
         ]);
     }
 

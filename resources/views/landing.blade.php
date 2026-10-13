@@ -111,6 +111,23 @@
     </div>
 </div>
 
+<div class="row g-3 mt-3">
+    @foreach ($packages as $package)
+        <div class="col-md-4">
+            <div class="card p-3 h-100">
+                <h5 class="fw-bold">{{ $package->name }}</h5>
+                <p class="text-success fw-bold mb-1">
+                    Rp {{ number_format($package->price, 0, ',', '.') }} 
+                    <span class="text-muted fw-normal">({{ $package->duration_hours }} jam)</span>
+                </p>
+                <p class="card-text text-muted mb-0">
+                    <strong>DESKRIPSI:</strong> {{ $package->description }}
+                </p>
+            </div>
+        </div>
+        @endforeach
+</div>
+
 {{-- isi galeri tiap fotografer, dipakai oleh popup --}}
 @foreach ($photographers as $item)
     @if ($item->photos->isNotEmpty())
