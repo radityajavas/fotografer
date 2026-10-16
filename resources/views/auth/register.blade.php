@@ -32,11 +32,10 @@
       ])
       <div class="form-text mb-3" style="margin-top:-0.5rem">Minimal 8 karakter, kombinasi huruf dan angka.</div>
 
-      <div class="mb-3">
-        <label for="password_confirmation" class="form-label">Konfirmasi Kata Sandi</label>
-        <input id="password_confirmation" type="password" name="password_confirmation" 
-               class="form-control" required autocomplete="new-password" placeholder="Ulangi kata sandi">
-      </div>
+      @include('auth.partials.password', [
+        'id' => 'password_confirmation', 'name' => 'password_confirmation', 'label' => 'Konfirmasi Kata Sandi',
+        'minlength' => 8, 'autocomplete' => 'new-password',
+        ])
 
       <button type="submit" class="btn btn-brand w-100">Daftar</button>
     </form>
