@@ -45,6 +45,7 @@ class LandingController extends Controller
         }
 
         return view('landing', [
+            'packages'      => Package::all(),
             'photographers' => $photographers->values(),
             'categories'    => $this->categories(),
         ]);
