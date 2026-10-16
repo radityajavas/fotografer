@@ -312,6 +312,10 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('galeri') }}">Galeri</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('bookings.my') }}">Pesanan Saya</a>
                     </li>
                 </ul>

@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Auth\ProfileController;
+use App\Http\Controllers\GalleryController;
 
 // 1. Auth
 Auth::routes();
@@ -26,6 +27,8 @@ Auth::routes();
 // 2. Public
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/fotografer/cari', [LandingController::class, 'cari'])->name('fotografer.cari');
+
+Route::get('/galeri', [LandingController::class, 'gallery'])->name('galeri');
 
 Route::get('/home', function () {
     return auth()->user()->role === 'admin' 
@@ -36,9 +39,7 @@ Route::get('/home', function () {
 Route::get('/fotografi', [PhotographyController::class, 'index'])->name('fotografi.index');
 Route::post('/fotografi/contact', [PhotographyController::class, 'storeContact'])->name('fotografi.contact');
 
-Route::get('/photographer/detail', function () {
-    return view('photographers.show');
-});
+Route::get('/photographer/{id}', [App\Http\Controllers\Admin\PhotographerController::class, 'show'])->name('photographers.show');   
 
 
 // 3. Profil pengguna

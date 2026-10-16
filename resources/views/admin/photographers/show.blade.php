@@ -1,79 +1,114 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div style="max-width: 1200px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif;">
     
-    <!-- Profile Header -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="flex items-center space-x-5">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200" class="w-20 h-20 rounded-full object-cover">
-            <div>
-                <div class="flex items-center space-x-2">
-                    <h1 class="text-2xl font-bold text-gray-900">Rian Studio</h1>
-                    <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full">Terverifikasi</span>
-                </div>
-                <p class="text-gray-500 text-sm mt-1">Spesialis Wedding, Portrait & Fashion Photographer</p>
-                <p class="text-xs text-gray-400 mt-0.5">📍 Surabaya, Jawa Timur</p>
-            </div>
-        </div>
-        <div class="flex gap-6 border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 text-center">
-            <div>
-                <p class="text-xs text-gray-400">Rating</p>
-                <p class="text-lg font-bold text-gray-800">★ 4.9</p>
-            </div>
-            <div>
-                <p class="text-xs text-gray-400">Selesai</p>
-                <p class="text-lg font-bold text-gray-800">45 Sesi</p>
-            </div>
-        </div>
+    <!-- Tombol Kembali ke Galeri -->
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url('/galeri') }}" 
+           style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #374151; border: 1px solid #e5e7eb; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;"
+           onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db';" 
+           onmouseout="this.style.background='white'; this.style.borderColor='#e5e7eb';">
+            <span>&larr;</span> Kembali ke Galeri
+        </a>
     </div>
 
-    <!-- Main Content Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Header Profil Fotografer -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
         
-        <!-- Left Column: Portfolio Gallery -->
-        <div class="lg:col-span-2 space-y-6">
-            <h2 class="text-xl font-bold text-gray-900">Portofolio Hasil Foto</h2>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- Lingkaran Avatar Inisial -->
+            <div style="width: 70px; height: 70px; border-radius: 50%; background: #ccfbf1; color: #115e59; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; flex-shrink: 0;">
+                {{ strtoupper(substr($photographer->name ?? $photographer->nama, 0, 1)) }}
+            </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=400" class="rounded-xl object-cover w-full h-48">
-                <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=400" class="rounded-xl object-cover w-full h-48">
-                <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?q=80&w=400" class="rounded-xl object-cover w-full h-48">
-                <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=400" class="rounded-xl object-cover w-full h-48">
+            <div>
+                <h1 style="font-size: 22px; font-weight: bold; margin: 0; color: #111;">{{ $photographer->name ?? $photographer->nama }}</h1>
+                
+                <div style="margin-top: 6px; font-size: 14px; color: #4b5563;">
+                    <p style="margin: 0 0 2px 0;">📞 {{ $photographer->phone ?? $photographer->telephone ?? '-' }}</p>
+                    <p style="margin: 0;">📍 {{ $photographer->city ?? $photographer->alamat ?? 'Malang, Jawa Timur' }}</p>
+                </div>
             </div>
         </div>
 
-        <!-- Right Column: Sticky Booking Widget -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm sticky top-24">
-                <h3 class="text-lg font-bold text-gray-900 mb-1">Pesan Sesi Foto</h3>
-                <p class="text-sm font-semibold text-indigo-600 mb-4">Rp 450.000 <span class="text-xs text-gray-400 font-normal">/ jam</span></p>
-
-                <form action="#" method="POST" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Acara</label>
-                        <input type="date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-600">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Durasi (Jam)</label>
-                        <select class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-600">
-                            <option value="1">1 Jam</option>
-                            <option value="2">2 Jam</option>
-                            <option value="4">Half Day (4 Jam)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Lokasi Pemotretan</label>
-                        <input type="text" placeholder="Alamat / Nama tempat" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-600">
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
-                        Lanjut ke Pembayaran
-                    </button>
-                </form>
+        <div style="display: flex; gap: 24px; border-left: 1px solid #e5e7eb; padding-left: 24px;">
+            <div>
+                <p style="margin: 0; font-size: 12px; color: #9ca3af;">Spesialisasi</p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #1f2937;">{{ $photographer->specialization ?? '-' }}</p>
+            </div>
+            <div>
+                <p style="margin: 0; font-size: 12px; color: #9ca3af;">Status</p>
+                <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 4px;">
+                    {{ $photographer->status ?? 'AVAILABLE' }}
+                </p>
             </div>
         </div>
-
     </div>
+
+    <!-- Grid Hasil Foto Portofolio -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <h2 style="font-size: 18px; font-weight: bold; margin-top: 0; margin-bottom: 20px; color: #111;">Hasil Foto Portofolio</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+            @forelse($photographer->photos as $photo)
+                <div onclick="openModal('{{ $photo->url }}')" 
+                     style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s;"
+                     onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                    
+                    <div style="position: relative; height: 190px; background: #f3f4f6;">
+                        <img src="{{ $photo->url }}" 
+                             style="width: 100%; height: 100%; object-fit: cover;" 
+                             alt="Hasil Foto">
+                        
+                        @if($photo->kategori)
+                            <span style="position: absolute; top: 10px; left: 10px; background: rgba(17, 24, 39, 0.85); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 6px; backdrop-filter: blur(4px);">
+                                {{ $photo->kategori }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <div style="padding: 12px 16px; background: white;">
+                        <p style="margin: 0; font-size: 13px; font-weight: 600; color: #374151;">
+                            {{ $photographer->name }}
+                        </p>
+                        <p style="margin: 2px 0 0 0; font-size: 11px; color: #9ca3af;">
+                            {{ $photographer->specialization ?? 'Portofolio' }}
+                        </p>
+                    </div>
+
+                </div>
+            @empty
+                <div style="grid-column: span 3; text-align: center; padding: 40px; color: #9ca3af; font-size: 14px;">
+                    Belum ada hasil foto yang diunggah oleh fotografer ini.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
 </div>
+
+<!-- Pop-up Modal Gambar + Tombol Silang (X) -->
+<div id="imageModal" onclick="closeModal()" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    
+    <button onclick="closeModal()" 
+            style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.25); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; line-height: 1; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.4)'" 
+            onmouseout="this.style.background='rgba(255,255,255,0.25)'">
+        ✕
+    </button>
+    
+    <img id="modalImg" src="" onclick="event.stopPropagation()" style="max-width: 90%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain;">
+</div>
+
+<script>
+    function openModal(imgUrl) {
+        document.getElementById('modalImg').src = imgUrl;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+</script>
 @endsection

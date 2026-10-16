@@ -1,7 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-
+<style>
+    body {
+        margin: 0; 
+        min-height: 100vh;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+        color: #1f2937;
+        background: linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)), url('{{ asset('images/jepret.jpg') }}') center / cover fixed;
+    }
+</style>
+    
 <h1 class="fw-bold mb-1" style="letter-spacing:-0.02em;">Temukan fotografer untuk momenmu</h1>
 <p class="text-secondary mb-4">Pilih kota dan kategori, lihat fotografer yang tersedia, lalu buat pesanan.</p>
 
@@ -90,8 +99,6 @@
 
                         <td class="text-end" style="white-space:nowrap">
                             @if ($item->photos->isNotEmpty())
-                                <button type="button" class="btn btn-outline-secondary btn-sm px-3"
-                                        data-galeri="{{ $item->id }}" data-nama="{{ $item->name }}" data-info="{{ $info }}">Lihat foto</button>
                             @endif
                             @if ($item->status == 'AVAILABLE')
                                 <a href="{{ route('booking.create', ['photographer_id' => $item->id]) }}"

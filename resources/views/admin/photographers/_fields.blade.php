@@ -1,4 +1,13 @@
 <div class="mb-3">
+    <label class="form-label">Foto Profil</label>
+    <input type="file" name="photo" class="form-control @error('photo') is-invalid @enderror" accept="image/png, image/jpeg, image/webp">
+    <div class="form-text">Format JPG, PNG, atau WEBP. Maksimal 2 MB.</div>
+    @error('photo')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="mb-3">
   <label class="form-label">Nama</label>
   <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
          value="{{ old('name', $photographer->name ?? '') }}" required>

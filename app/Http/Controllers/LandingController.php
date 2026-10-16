@@ -11,20 +11,27 @@ class LandingController extends Controller
     public function index()
     {
         return view('landing', [
-        'packages'      => Package::all(),
-        'photographers' => Photographer::with(['photos' => fn ($q) => $q->latest()])->get(),
-        'categories'    => $this->categories(),
+            'packages'      => Package::all(),
+            'photographers' => Photographer::with(['photos' => fn($q) => $q->latest()])->get(),
+            'categories'    => $this->categories(),
         ]);
+    }
+
+    public function gallery()
+    {
+        $photographers = Photographer::with('photos')->latest()->get();
+
+        return view('galeri', compact('photographers'));
     }
 
     public function cari(Request $request)
     {
-        $photographers = Photographer::with(['photos' => fn ($q) => $q->latest()])->get();
+        $photographers = Photographer::with(['photos' => fn($q) => $q->latest()])->get();
 
         if ($request->filled('lokasi')) {
             $lokasi = mb_strtolower(trim($request->lokasi));
             $photographers = $photographers->filter(
-                fn ($p) => str_contains(mb_strtolower($p->city ?? ''), $lokasi)
+                fn($p) => str_contains(mb_strtolower($p->city ?? ''), $lokasi)
             );
         }
 
@@ -32,7 +39,7 @@ class LandingController extends Controller
             $kategori = mb_strtolower(trim($request->kategori));
             $photographers = $photographers->filter(function ($p) use ($kategori) {
                 return collect(explode(',', $p->specialization ?? ''))
-                    ->map(fn ($s) => mb_strtolower(trim($s)))
+                    ->map(fn($s) => mb_strtolower(trim($s)))
                     ->contains($kategori);
             });
         }
@@ -46,10 +53,10 @@ class LandingController extends Controller
     private function categories()
     {
         return Photographer::pluck('specialization')
-            ->flatMap(fn ($s) => explode(',', $s ?? ''))
-            ->map(fn ($s) => trim($s))
+            ->flatMap(fn($s) => explode(',', $s ?? ''))
+            ->map(fn($s) => trim($s))
             ->filter()
-            ->unique(fn ($s) => mb_strtolower($s))
+            ->unique(fn($s) => mb_strtolower($s))
             ->sort()
             ->values();
     }

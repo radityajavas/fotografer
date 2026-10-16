@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Photographer extends Model
 {
-    protected $fillable = ['name', 'phone', 'city', 'specialization', 'status'];
+    protected $fillable = ['name', 'phone', 'city', 'specialization', 'status', 'photo'];
 
     public function bookings()
     {
