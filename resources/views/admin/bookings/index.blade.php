@@ -3,243 +3,383 @@
 @section('title', 'Data Booking')
 
 @section('content')
+@php
+    $current = $status ?? 'all';
+    $badge = [
+        'pending'  => ['Menunggu', 'bg-yellow-lt'],
+        'diterima' => ['Diterima', 'bg-green-lt'],
+        'ditolak'  => ['Ditolak',  'bg-red-lt'],
+    ];
+    // Form hanya terbuka otomatis kalau pengisian sebelumnya gagal validasi
+    $bukaForm = old('user_id') || old('photographer_id') || old('package_id');
+@endphp
+
 <style>
-    .bk-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 18px; height: 100%; }
-    .bk-stat .lbl { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #6b7280; }
-    .bk-stat .num { margin-top: 6px; font-size: 22px; font-weight: 700; color: #111827; }
-
-    .bk-box { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
-    .bk-tabs { padding: 12px 14px; border-bottom: 1px solid #f0f1f3; }
-    .bk-tabs a { display: inline-block; margin-right: 4px; padding: 6px 12px; border-radius: 6px; font-size: 13px; color: #6b7280; text-decoration: none; }
-    .bk-tabs a.on { background: #eaf2fd; color: #2563eb; }
-
-    .bk-table { width: 100%; border-collapse: collapse; font-size: 13px; color: #374151; }
-    .bk-table th { padding: 10px 16px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #6b7280; background: #fafafa; border-bottom: 1px solid #f0f1f3; text-align: left; white-space: nowrap; }
-    .bk-table td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
-    .bk-table tr:last-child td { border-bottom: 0; }
-    .bk-table .center { text-align: center; }
-
-    .bd { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .bd.m { background: #fef3c7; color: #b45309; }
-    .bd.d { background: #dcfce7; color: #15803d; }
-    .bd.t { background: #fee2e2; color: #b91c1c; }
-
-    /* toggle: kiri = tolak, tengah = menunggu, kanan = terima */
-    .tg { position: relative; display: inline-block; width: 76px; height: 32px; box-sizing: border-box; border: 1px solid #e5e7eb; border-radius: 16px; background: #f3f4f6; vertical-align: middle; }
-    .tg .s { position: absolute; top: 0; width: 24px; line-height: 30px; text-align: center; font-size: 12px; color: #9ca3af; }
-    .tg .s1 { left: 3px; } .tg .s2 { left: 25px; } .tg .s3 { left: 47px; }
-    .tg .k { position: absolute; top: 3px; left: 25px; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 13px; line-height: 24px; text-align: center; background: #f59e0b; transition: left .2s; pointer-events: none; }
-    .tg.kiri .k { left: 3px; background: #dc2626; }
-    .tg.kanan .k { left: 47px; background: #22c55e; }
-    .tg.kunci { opacity: .75; }
-    .tg button { position: absolute; top: 0; bottom: 0; width: 50%; padding: 0; border: 0; background: transparent; cursor: pointer; }
-    .tg .zk { left: 0; border-radius: 16px 0 0 16px; } .tg .zn { right: 0; border-radius: 0 16px 16px 0; }
-    .tg .zk:hover { background: rgba(220,38,38,.12); } .tg .zn:hover { background: rgba(34,197,94,.15); }
-
-    .bk-chat { display: inline-block; margin-left: 8px; padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; color: #374151; text-decoration: none; vertical-align: middle; }
-    .bk-chat:hover { background: #f3f4f6; color: #111827; text-decoration: none; }
-    .bk-chat svg { width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; }
+  .tri-toggle { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px;
+                background: var(--tblr-bg-surface-secondary, #eef0f3); border: 1px solid var(--tblr-border-color, #dadfe5); }
+  .tri-opt { width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; padding: 0;
+             display: inline-flex; align-items: center; justify-content: center; color: #9aa4b2; cursor: pointer;
+             transition: background .15s, color .15s; }
+  .tri-opt:hover:not(:disabled) { background: rgba(0,0,0,.07); }
+  .tri-opt:disabled { cursor: default; opacity: 1; }
+  .tri-toggle.is-locked { cursor: not-allowed; }
+  .tri-toggle.is-locked .tri-opt { cursor: not-allowed; }
+  .tri-toggle.is-locked .tri-opt:not(.tri-no):not(.tri-yes):not(.tri-mid) { opacity: .5; }
+  .tri-toggle.is-locked[data-state="diterima"] .tri-no,
+  .tri-toggle.is-locked[data-state="diterima"] .tri-mid,
+  .tri-toggle.is-locked[data-state="ditolak"] .tri-yes,
+  .tri-toggle.is-locked[data-state="ditolak"] .tri-mid { opacity: .35; }
+  .tri-toggle[data-state="ditolak"]  .tri-no  { background: var(--tblr-danger,  #d63939); color: #fff; }
+  .tri-toggle[data-state="pending"]  .tri-mid { background: var(--tblr-warning, #f59f00); color: #fff; }
+  .tri-toggle[data-state="diterima"] .tri-yes { background: var(--tblr-success, #2fb344); color: #fff; }
 </style>
 
-@if (session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 @if (session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
+  <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+@endif
+@if (session('info'))
+  <div class="alert alert-info" role="alert">{{ session('info') }}</div>
+@endif
+@if (session('success'))
+  <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+@endif
+@if ($errors->any())
+  <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
 @endif
 
-<div class="row" style="margin-bottom: 16px">
-    <div class="col-6 col-md-3" style="margin-bottom: 12px"><div class="bk-stat"><div class="lbl">Total Pemesanan</div><div class="num">{{ $stats['total'] }}</div></div></div>
-    <div class="col-6 col-md-3" style="margin-bottom: 12px"><div class="bk-stat"><div class="lbl">Menunggu Konfirmasi</div><div class="num">{{ $stats['pending'] }}</div></div></div>
-    <div class="col-6 col-md-3" style="margin-bottom: 12px"><div class="bk-stat"><div class="lbl">Diterima</div><div class="num">{{ $stats['diterima'] }}</div></div></div>
-    <div class="col-6 col-md-3" style="margin-bottom: 12px"><div class="bk-stat"><div class="lbl">Total Pendapatan</div><div class="num">Rp {{ number_format($stats['pendapatan'], 0, ',', '.') }}</div></div></div>
+{{-- Tombol untuk menampilkan / menyembunyikan form booking baru --}}
+<div class="d-flex justify-content-end mb-3">
+  <button type="button" id="btnKeForm" class="btn btn-primary">
+    <i class="ti ti-calendar-plus me-1"></i>Booking Baru
+  </button>
 </div>
 
-<div class="bk-box">
-    <div class="bk-tabs">
-        @foreach (['all' => 'Semua', 'menunggu' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'] as $key => $label)
-            <a href="{{ route('admin.bookings.index', $key === 'all' ? [] : ['status' => $key]) }}"
-               class="{{ ($status ?: 'all') === $key ? 'on' : '' }}">{{ $label }}</a>
-        @endforeach
+{{-- Form: booking baru (tersembunyi sampai tombol ditekan) --}}
+<div class="card mb-3 {{ $bukaForm ? '' : 'd-none' }}" id="formBookingBaru" style="scroll-margin-top: 1rem;">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-calendar-plus me-1"></i>Buat Booking Baru</h3>
+    <div class="card-actions">
+      <button type="button" class="btn-close js-tutup-form" aria-label="Tutup"></button>
     </div>
-
-    <div class="table-responsive">
-        <table class="bk-table">
-            <thead>
-                <tr>
-                    <th>Pemesan</th>
-                    <th>Fotografer</th>
-                    <th>Tanggal Foto</th>
-                    <th>Total Harga</th>
-                    <th>Status</th>
-                    <th class="center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse ($bookings as $b)
-                @php
-                    $tgl  = $b->booking_date ? \Carbon\Carbon::parse($b->booking_date) : null;
-                    $lewat = $tgl && $tgl->isPast() && ! $tgl->isToday();
-                    $st   = strtolower($b->status);
-                    $chatUrl = \Illuminate\Support\Facades\Route::has('admin.chats.show')
-                        ? route('admin.chats.show', $b->id)
-                        : url('/admin/chats/' . $b->id);
-                @endphp
-                <tr>
-                    <td><strong>{{ $b->user->name ?? '-' }}</strong></td>
-                    <td>{{ $b->photographer->name ?? '-' }}</td>
-                    <td style="white-space: nowrap">
-                        {{ $tgl ? $tgl->format('d M Y') : '-' }}
-                        @if ($b->time_range)
-                            <div style="font-size: 11px; color: #9ca3af">{{ str_replace(':', '.', $b->time_range) }}</div>
-                        @endif
-                    </td>
-                    <td style="white-space: nowrap">Rp {{ number_format($b->package->price ?? $b->total_harga ?? 0, 0, ',', '.') }}</td>
-                    <td>
-                        @if ($st === 'diterima')
-                            <span class="bd d">Diterima</span>
-                        @elseif ($st === 'ditolak')
-                            <span class="bd t">Ditolak</span>
-                        @else
-                            <span class="bd m">Menunggu</span>
-                        @endif
-                    </td>
-                    <td class="center" style="white-space: nowrap">
-                        @if ($st === 'diterima')
-                            <span class="tg kanan kunci"><span class="s s1">&#10005;</span><span class="s s2">&ndash;</span><span class="s s3">&#10003;</span><span class="k">&#10003;</span></span>
-                        @elseif ($st === 'ditolak')
-                            <span class="tg kiri kunci"><span class="s s1">&#10005;</span><span class="s s2">&ndash;</span><span class="s s3">&#10003;</span><span class="k">&#10005;</span></span>
-                        @elseif ($lewat)
-                            <span class="tg kunci" title="Tanggal foto sudah lewat"><span class="s s1">&#10005;</span><span class="s s2">&ndash;</span><span class="s s3">&#10003;</span><span class="k">&ndash;</span></span>
-                        @else
-                            <form method="POST" action="{{ route('admin.bookings.updateStatus', $b->id) }}" class="form-status" style="display: inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="">
-                                <span class="tg">
-                                    <span class="s s1">&#10005;</span><span class="s s2">&ndash;</span><span class="s s3">&#10003;</span>
-                                    <span class="k">&ndash;</span>
-                                    <button type="button" class="zk" title="Tolak" data-status="ditolak" data-nama="{{ $b->user->name ?? 'pelanggan' }}"></button>
-                                    <button type="button" class="zn" title="Terima" data-status="diterima" data-nama="{{ $b->user->name ?? 'pelanggan' }}"></button>
-                                </span>
-                            </form>
-                        @endif
-                        <a href="{{ $chatUrl }}" class="bk-chat">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>Chat
-                        </a>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="6" class="center" style="color: #9ca3af">Belum ada booking.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div style="padding: 12px 16px">
-        {{ $bookings->appends(request()->query())->links('pagination::bootstrap-4') }}
-    </div>
-</div>
-
-{{-- Modal konfirmasi (gaya Tabler) --}}
-<style>
-    #modalKonfirmasi { background: rgba(24, 36, 51, .35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-    #modalKonfirmasi .modal-content { position: relative; border: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 8px 30px rgba(24, 36, 51, .2); }
-    #modalKonfirmasi .modal-status { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-    #modalKonfirmasi .st-merah { background: #d63939; }
-    #modalKonfirmasi .st-hijau { background: #2fb344; }
-    #modalKonfirmasi .tutup { position: absolute; top: 8px; right: 12px; border: 0; background: transparent; font-size: 22px; line-height: 1; color: #9ca3af; cursor: pointer; }
-    #modalKonfirmasi .tutup:hover { color: #374151; }
-    #modalKonfirmasi .ikon { width: 48px; height: 48px; margin-bottom: 10px; }
-    #modalKonfirmasi .judul { margin: 0 0 6px; font-size: 18px; font-weight: 600; color: #182433; }
-    #modalKonfirmasi .isi { color: #667382; font-size: 14px; }
-    #modalKonfirmasi .modal-footer { border-top: 1px solid #e6e7e9; padding: 12px 16px; }
-    #modalKonfirmasi .modal-footer .tombol { display: block; width: 100%; padding: 7px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; text-align: center; }
-    #modalKonfirmasi .t-batal { border: 1px solid #dadfe5; background: #fff; color: #182433; }
-    #modalKonfirmasi .t-batal:hover { background: #f6f8fb; }
-    #modalKonfirmasi .t-ya { border: 1px solid transparent; color: #fff; }
-    #modalKonfirmasi .t-ya.merah { background: #d63939; }
-    #modalKonfirmasi .t-ya.hijau { background: #2fb344; }
-</style>
-
-<div class="modal fade" id="modalKonfirmasi" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <button type="button" class="tutup" data-tutup aria-label="Tutup">&times;</button>
-            <div class="modal-status st-merah" id="mkBar"></div>
-            <div class="modal-body text-center" style="padding: 28px 24px 20px">
-                <svg id="mkIkonTolak" class="ikon" viewBox="0 0 24 24" fill="none" stroke="#d63939" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>
-                <svg id="mkIkonTerima" class="ikon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="#2fb344" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>
-                <h3 class="judul" id="mkJudul"></h3>
-                <div class="isi" id="mkIsi"></div>
-            </div>
-            <div class="modal-footer">
-                <div class="w-100">
-                    <div class="row">
-                        <div class="col"><button type="button" class="tombol t-batal" data-tutup>Batal</button></div>
-                        <div class="col"><button type="button" class="tombol t-ya merah" id="mkYa">Ya</button></div>
-                    </div>
-                </div>
-            </div>
+  </div>
+  <form method="POST" action="{{ route('admin.bookings.store') }}" autocomplete="off">
+    @csrf
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label required">Pelanggan</label>
+          <select name="user_id" required class="form-select @error('user_id') is-invalid @enderror">
+            <option value="">Pilih pelanggan</option>
+            @foreach ($customers as $c)
+              <option value="{{ $c->id }}" @selected(old('user_id') == $c->id)>{{ $c->name }} · {{ $c->email }}</option>
+            @endforeach
+          </select>
+          @error('user_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @else
+            <div class="form-hint">Belum punya akun? Buat dulu di menu Pelanggan.</div>
+          @enderror
         </div>
+        <div class="col-md-4">
+          <label class="form-label required">Fotografer</label>
+          <select name="photographer_id" required class="form-select @error('photographer_id') is-invalid @enderror">
+            <option value="">Pilih fotografer</option>
+            @foreach ($photographers as $p)
+              <option value="{{ $p->id }}" @selected(old('photographer_id') == $p->id)>{{ $p->name }}</option>
+            @endforeach
+          </select>
+          @error('photographer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-4">
+          <label class="form-label required">Paket</label>
+          <select name="package_id" id="nbPackage" required class="form-select @error('package_id') is-invalid @enderror">
+            <option value="">Pilih paket</option>
+            @foreach ($packages as $pk)
+              <option value="{{ $pk->id }}" data-duration="{{ (int) $pk->duration_hours }}" @selected(old('package_id') == $pk->id)>
+                {{ $pk->name }} · {{ $pk->duration_hours }} jam · Rp {{ number_format($pk->price, 0, ',', '.') }}
+              </option>
+            @endforeach
+          </select>
+          @error('package_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-3">
+          <label class="form-label required">Tanggal</label>
+          <input type="date" name="booking_date" value="{{ old('booking_date') }}" min="{{ today()->toDateString() }}" required
+                 class="form-control @error('booking_date') is-invalid @enderror">
+          @error('booking_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-3">
+          <label class="form-label required">Jam mulai</label>
+          <input type="time" name="start_time" id="nbStart" value="{{ old('start_time') }}" min="08:00" max="20:00" required
+                 class="form-control @error('start_time') is-invalid @enderror">
+          @error('start_time')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @else
+            <div class="form-hint" id="nbEnd">Jam operasional 08.00–20.00</div>
+          @enderror
+        </div>
+        <div class="col-md-6">
+          <label class="form-label required">Lokasi / alamat pemotretan</label>
+          <textarea name="lokasi" rows="2" maxlength="400" required placeholder="Jalan, nomor, patokan"
+                    class="form-control @error('lokasi') is-invalid @enderror">{{ old('lokasi') }}</textarea>
+          @error('lokasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+      </div>
     </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <span class="text-secondary small">Booking dibuat dengan status Menunggu, lalu disetujui lewat toggle di tabel bawah.</span>
+      <div>
+        <button type="button" class="btn me-2 js-tutup-form">Batal</button>
+        <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan booking</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="row row-deck row-cards mb-3">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Total Pemesanan</div>
+      <div class="h1 mb-0">{{ $stats['total'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Menunggu Konfirmasi</div>
+      <div class="h1 mb-0">{{ $stats['pending'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Diterima</div>
+      <div class="h1 mb-0">{{ $stats['diterima'] }}</div>
+    </div></div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card"><div class="card-body">
+      <div class="subheader">Total Pendapatan</div>
+      <div class="h1 mb-0">Rp {{ number_format($stats['pendapatan'], 0, ',', '.') }}</div>
+    </div></div>
+  </div>
 </div>
 
 <script>
-    (function () {
-        var modal = document.getElementById('modalKonfirmasi');
-        var formAktif = null, statusAktif = null, backdrop = null;
+  // Petunjuk jam selesai di form booking
+  (function () {
+    var pkg = document.getElementById('nbPackage'), start = document.getElementById('nbStart'), hint = document.getElementById('nbEnd');
+    if (!pkg || !start || !hint) return;
+    var base = hint.textContent;
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    function update() {
+      var opt = pkg.options[pkg.selectedIndex], dur = opt ? parseInt(opt.getAttribute('data-duration'), 10) : 0;
+      if (!dur || !start.value) { hint.textContent = base; return; }
+      var p = start.value.split(':'), mins = parseInt(p[0], 10) * 60 + parseInt(p[1], 10) + dur * 60;
+      hint.textContent = mins > 20 * 60 ? 'Melewati jam operasional (maks. selesai 20.00)'
+                                       : 'Selesai pukul ' + pad(Math.floor(mins / 60)) + '.' + pad(mins % 60);
+    }
+    pkg.addEventListener('change', update);
+    start.addEventListener('input', update);
+    update();
+  })();
+</script>
 
-        function buka(form, status, nama) {
-            formAktif = form; statusAktif = status;
-            var tolak = status === 'ditolak';
-            document.getElementById('mkBar').className = 'modal-status ' + (tolak ? 'st-merah' : 'st-hijau');
-            document.getElementById('mkIkonTolak').style.display = tolak ? '' : 'none';
-            document.getElementById('mkIkonTerima').style.display = tolak ? 'none' : '';
-            document.getElementById('mkJudul').textContent = tolak ? 'Tolak booking ini?' : 'Terima booking ini?';
-            document.getElementById('mkIsi').textContent = 'Booking dari ' + nama + (tolak ? ' akan ditolak.' : ' akan diterima.') + ' Pilihan tidak bisa diubah lagi.';
-            var ya = document.getElementById('mkYa');
-            ya.textContent = tolak ? 'Ya, tolak' : 'Ya, terima';
-            ya.className = 'tombol t-ya ' + (tolak ? 'merah' : 'hijau');
+<script>
+  // Tombol "Booking Baru": tampilkan / sembunyikan form
+  (function () {
+    var card = document.getElementById('formBookingBaru');
+    var btn  = document.getElementById('btnKeForm');
+    if (!card || !btn) return;
+    var labelAwal = btn.innerHTML;
 
-            document.body.appendChild(modal);
-            backdrop = document.createElement('div');
-            backdrop.className = 'modal-backdrop fade show';
-            backdrop.style.background = 'transparent';
-            document.body.appendChild(backdrop);
-            modal.style.display = 'block';
-            modal.classList.add('show');
-            document.body.classList.add('modal-open');
-            document.body.style.overflow = 'hidden';
+    function buka() {
+      card.classList.remove('d-none');
+      btn.innerHTML = '<i class="ti ti-x me-1"></i>Tutup Form';
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () {
+        var f = card.querySelector('select[name="user_id"]');
+        if (f) f.focus({ preventScroll: true });
+      }, 400);
+    }
+
+    function tutup() {
+      card.classList.add('d-none');
+      btn.innerHTML = labelAwal;
+    }
+
+    btn.addEventListener('click', function () {
+      if (card.classList.contains('d-none')) { buka(); } else { tutup(); }
+    });
+
+    document.querySelectorAll('.js-tutup-form').forEach(function (el) {
+      el.addEventListener('click', tutup);
+    });
+
+    // Kalau pengisian sebelumnya gagal validasi, form langsung terbuka lagi
+    @if ($bukaForm)
+      buka();
+    @endif
+  })();
+</script>
+
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-pills card-header-pills">
+      @foreach (['all' => 'Semua', 'pending' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'] as $val => $label)
+        <li class="nav-item">
+          <a class="nav-link {{ $current === $val ? 'active' : '' }}"
+             href="{{ route('admin.bookings.index', ['status' => $val]) }}">{{ $label }}</a>
+        </li>
+      @endforeach
+    </ul>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-vcenter card-table">
+      <thead>
+        <tr>
+          <th>Pemesan</th>
+          <th>Fotografer</th>
+          <th>Tanggal Foto</th>
+          <th>Total Harga</th>
+          <th>Status</th>
+          <th class="text-center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        @forelse ($bookings as $booking)
+          @php $s = strtolower($booking->status); @endphp
+          <tr>
+            <td class="fw-semibold">{{ $booking->user->name ?? '-' }}</td>
+            <td>{{ $booking->photographer->name ?? '-' }}</td>
+            <td>
+              {{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '-' }}
+              @if ($booking->time_range)
+                <div class="text-secondary small">{{ str_replace(':', '.', $booking->time_range) }}</div>
+              @endif
+            </td>
+            <td>
+              @if ($booking->package)
+                Rp {{ number_format($booking->package->price, 0, ',', '.') }}
+              @else
+                -
+              @endif
+            </td>
+            <td>
+              <span class="badge {{ $badge[$s][1] ?? 'bg-secondary-lt' }}">
+                {{ $badge[$s][0] ?? $booking->status }}
+              </span>
+            </td>
+            <td class="text-center text-nowrap">
+              {{-- Toggle 3 posisi: kiri = Ditolak, tengah = Menunggu, kanan = Diterima --}}
+              <form action="{{ route('admin.bookings.updateStatus', $booking->id) }}" method="POST" class="d-inline-block align-middle me-2 js-status-form"
+                    data-pemesan="{{ $booking->user->name ?? '-' }}"
+                    data-fotografer="{{ $booking->photographer->name ?? '-' }}"
+                    data-tanggal="{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '-' }}{{ $booking->time_range ? ' · ' . str_replace(':', '.', $booking->time_range) : '' }}">
+                @csrf @method('PATCH')
+                @php $locked = $s !== 'pending'; @endphp
+                <div class="tri-toggle {{ $locked ? 'is-locked' : '' }}" data-state="{{ $s }}"
+                     title="{{ $locked ? 'Status sudah final dan tidak bisa diubah' : 'Pilih setujui atau tolak' }}">
+                  <button type="submit" name="status" value="ditolak" class="tri-opt tri-no" title="Tolak" @disabled($locked)><i class="ti ti-x"></i></button>
+                  <button type="button" class="tri-opt tri-mid" tabindex="-1" disabled><i class="ti ti-minus"></i></button>
+                  <button type="submit" name="status" value="diterima" class="tri-opt tri-yes" title="Setujui" @disabled($locked)><i class="ti ti-check"></i></button>
+                </div>
+              </form>
+
+              <a href="{{ route('admin.chats.show', $booking->id) }}" class="btn btn-sm btn-outline-secondary"><i class="ti ti-message-circle me-1"></i>Chat</a>
+            </td>
+          </tr>
+        @empty
+          <tr>
+            <td colspan="6" class="text-center text-secondary py-4">Belum ada data booking.</td>
+          </tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div>
+
+  @if ($bookings->hasPages())
+    <div class="card-footer">{{ $bookings->withQueryString()->links() }}</div>
+  @endif
+</div>
+
+{{-- Pemicu tersembunyi untuk membuka modal konfirmasi --}}
+<button type="button" id="csTrigger" class="d-none" data-bs-toggle="modal" data-bs-target="#confirmStatusModal" tabindex="-1" aria-hidden="true"></button>
+
+{{-- Modal konfirmasi (Bootstrap) --}}
+<div class="modal modal-blur fade" id="confirmStatusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center py-4">
+        <div id="csIcon" class="mb-3" style="font-size:3rem;line-height:1"></div>
+        <h3 id="csTitle" class="mb-2"></h3>
+        <div id="csText" class="text-secondary"></div>
+        <div class="alert alert-warning py-2 mt-3 mb-0 small">
+          <i class="ti ti-lock me-1"></i>Pilihan ini tidak bisa diubah lagi.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="w-100">
+          <div class="row">
+            <div class="col"><button type="button" class="btn w-100" data-bs-dismiss="modal">Batal</button></div>
+            <div class="col"><button type="button" class="btn w-100" id="csOk">Ya</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var pendingForm = null, pendingValue = null;
+
+    function submitWith(form, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden'; input.name = 'status'; input.value = value;
+      form.appendChild(input);
+      form.submit(); // submit() tidak memicu event 'submit' lagi
+    }
+
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (!form.classList || !form.classList.contains('js-status-form')) return;
+      e.preventDefault();
+
+      var value = e.submitter ? e.submitter.value : null;
+      if (value !== 'diterima' && value !== 'ditolak') return;
+
+      var approve = value === 'diterima';
+      var detail = 'Pemesan: ' + form.dataset.pemesan + '\nFotografer: ' + form.dataset.fotografer + '\nTanggal: ' + form.dataset.tanggal;
+      pendingForm = form; pendingValue = value;
+      document.getElementById('csIcon').innerHTML = approve
+        ? '<i class="ti ti-circle-check text-success"></i>'
+        : '<i class="ti ti-circle-x text-danger"></i>';
+      document.getElementById('csTitle').textContent = approve ? 'Setujui booking ini?' : 'Tolak booking ini?';
+      document.getElementById('csText').innerHTML =
+        'Pemesan: <strong></strong><br>Fotografer: <strong></strong><br>Tanggal: <strong></strong>';
+      var strongs = document.getElementById('csText').querySelectorAll('strong');
+      strongs[0].textContent = form.dataset.pemesan;
+      strongs[1].textContent = form.dataset.fotografer;
+      strongs[2].textContent = form.dataset.tanggal;
+
+      var ok = document.getElementById('csOk');
+      ok.className = 'btn w-100 ' + (approve ? 'btn-success' : 'btn-danger');
+      ok.textContent = approve ? 'Ya, setujui' : 'Ya, tolak';
+      document.getElementById('csTrigger').click(); // buka modal lewat data-API Bootstrap
+      setTimeout(function () { // cadangan jika modal tidak terbuka
+        if (!document.getElementById('confirmStatusModal').classList.contains('show')) {
+          if (confirm((approve ? 'Setujui' : 'Tolak') + ' booking ini?\n\n' + detail + '\n\nPilihan tidak bisa diubah lagi.')) {
+            submitWith(form, value);
+          }
         }
+      }, 300);
+    });
 
-        function tutup() {
-            modal.classList.remove('show');
-            modal.style.display = 'none';
-            if (backdrop) { backdrop.remove(); backdrop = null; }
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            formAktif = null; statusAktif = null;
-        }
-
-        document.querySelectorAll('.form-status .tg button').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                buka(btn.closest('form'), btn.dataset.status, btn.dataset.nama);
-            });
-        });
-
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal || e.target.hasAttribute('data-tutup')) tutup();
-        });
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && formAktif) tutup();
-        });
-
-        document.getElementById('mkYa').addEventListener('click', function () {
-            if (!formAktif) return;
-            formAktif.querySelector('input[name="status"]').value = statusAktif;
-            formAktif.submit();
-        });
-    })();
+    document.getElementById('csOk').addEventListener('click', function () {
+      if (!pendingForm) return;
+      this.disabled = true; // cegah klik ganda
+      submitWith(pendingForm, pendingValue);
+    });
+  })();
 </script>
 @endsection
