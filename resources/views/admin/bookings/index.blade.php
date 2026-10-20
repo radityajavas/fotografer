@@ -11,7 +11,7 @@
         'ditolak'  => ['Ditolak',  'bg-red-lt'],
     ];
     // Form hanya terbuka otomatis kalau pengisian sebelumnya gagal validasi
-    $bukaForm = old('user_id') || old('photographer_id') || old('package_id');
+    $bukaForm = old('name') || old('username') || old('email') || old('photographer_id') || old('package_id');
 @endphp
 
 <style>
@@ -47,17 +47,17 @@
   <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
 @endif
 
-{{-- Tombol untuk menampilkan / menyembunyikan form booking baru --}}
+{{-- Tombol untuk menampilkan / menyembunyikan form akun & booking baru --}}
 <div class="d-flex justify-content-end mb-3">
   <button type="button" id="btnKeForm" class="btn btn-primary">
-    <i class="ti ti-calendar-plus me-1"></i>Booking Baru
+    <i class="ti ti-user-plus me-1"></i>Akun &amp; Booking Baru
   </button>
 </div>
 
-{{-- Form: booking baru (tersembunyi sampai tombol ditekan) --}}
+{{-- Form: buat akun pelanggan baru + booking (tersembunyi sampai tombol ditekan) --}}
 <div class="card mb-3 {{ $bukaForm ? '' : 'd-none' }}" id="formBookingBaru" style="scroll-margin-top: 1rem;">
   <div class="card-header">
-    <h3 class="card-title"><i class="ti ti-calendar-plus me-1"></i>Buat Booking Baru</h3>
+    <h3 class="card-title"><i class="ti ti-user-plus me-1"></i>Buat Akun Pelanggan &amp; Booking Baru</h3>
     <div class="card-actions">
       <button type="button" class="btn-close js-tutup-form" aria-label="Tutup"></button>
     </div>
@@ -65,22 +65,47 @@
   <form method="POST" action="{{ route('admin.bookings.store') }}" autocomplete="off">
     @csrf
     <div class="card-body">
-      <div class="row g-3">
+      <div class="subheader mb-2">1. Akun pelanggan</div>
+      <div class="row g-3 mb-4">
         <div class="col-md-4">
-          <label class="form-label required">Pelanggan</label>
-          <select name="user_id" required class="form-select @error('user_id') is-invalid @enderror">
-            <option value="">Pilih pelanggan</option>
-            @foreach ($customers as $c)
-              <option value="{{ $c->id }}" @selected(old('user_id') == $c->id)>{{ $c->name }} · {{ $c->email }}</option>
-            @endforeach
-          </select>
-          @error('user_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-          @else
-            <div class="form-hint">Belum punya akun? Buat dulu di menu Pelanggan.</div>
-          @enderror
+          <label class="form-label required">Nama lengkap</label>
+          <input type="text" name="name" value="{{ old('name') }}" maxlength="255" required
+                 class="form-control @error('name') is-invalid @enderror">
+          @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-2">
+          <label class="form-label required">Username</label>
+          <input type="text" name="username" value="{{ old('username') }}" maxlength="20" required
+                 class="form-control @error('username') is-invalid @enderror">
+          @error('username') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-3">
+          <label class="form-label required">Email</label>
+          <input type="email" name="email" value="{{ old('email') }}" maxlength="255" required
+                 class="form-control @error('email') is-invalid @enderror">
+          @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">No. telepon</label>
+          <input type="text" name="phone" value="{{ old('phone') }}" maxlength="20"
+                 class="form-control @error('phone') is-invalid @enderror">
+          @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
         <div class="col-md-4">
+          <label class="form-label required">Password</label>
+          <input type="password" name="password" minlength="8" required autocomplete="new-password"
+                 class="form-control @error('password') is-invalid @enderror">
+          @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @else
+            <div class="form-hint">Minimal 8 karakter.</div>
+          @enderror
+        </div>
+      </div>
+
+      <div class="subheader mb-2">2. Data booking</div>
+      <div class="row g-3">
+        <div class="col-md-3">
           <label class="form-label required">Fotografer</label>
           <select name="photographer_id" required class="form-select @error('photographer_id') is-invalid @enderror">
             <option value="">Pilih fotografer</option>
@@ -90,7 +115,7 @@
           </select>
           @error('photographer_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <label class="form-label required">Paket</label>
           <select name="package_id" id="nbPackage" required class="form-select @error('package_id') is-invalid @enderror">
             <option value="">Pilih paket</option>
@@ -118,7 +143,7 @@
             <div class="form-hint" id="nbEnd">Jam operasional 08.00–20.00</div>
           @enderror
         </div>
-        <div class="col-md-6">
+        <div class="col-12">
           <label class="form-label required">Lokasi / alamat pemotretan</label>
           <textarea name="lokasi" rows="2" maxlength="400" required placeholder="Jalan, nomor, patokan"
                     class="form-control @error('lokasi') is-invalid @enderror">{{ old('lokasi') }}</textarea>
@@ -130,7 +155,7 @@
       <span class="text-secondary small">Booking dibuat dengan status Menunggu, lalu disetujui lewat toggle di tabel bawah.</span>
       <div>
         <button type="button" class="btn me-2 js-tutup-form">Batal</button>
-        <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan booking</button>
+        <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan akun &amp; booking</button>
       </div>
     </div>
   </form>
@@ -184,7 +209,7 @@
 </script>
 
 <script>
-  // Tombol "Booking Baru": tampilkan / sembunyikan form
+  // Tombol "Akun & Booking Baru": tampilkan / sembunyikan form
   (function () {
     var card = document.getElementById('formBookingBaru');
     var btn  = document.getElementById('btnKeForm');
@@ -196,7 +221,7 @@
       btn.innerHTML = '<i class="ti ti-x me-1"></i>Tutup Form';
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setTimeout(function () {
-        var f = card.querySelector('select[name="user_id"]');
+        var f = card.querySelector('input[name="name"]');
         if (f) f.focus({ preventScroll: true });
       }, 400);
     }

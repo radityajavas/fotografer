@@ -9,7 +9,8 @@ use App\Models\Photographer;
 use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class BookingController extends Controller
 {
@@ -40,27 +41,32 @@ class BookingController extends Controller
                 ->sum(fn ($b) => $b->package->price ?? 0),
         ];
 
-        // Untuk form "Booking Baru"
-        $customers     = User::where('role', 'customer')->orderBy('name')->get();
+        // Untuk form "Akun Baru + Booking"
         $photographers = Photographer::orderBy('name')->get();
         $packages      = Package::orderBy('price')->get();
 
-        return view('admin.bookings.index', compact('bookings', 'stats', 'status', 'customers', 'photographers', 'packages'));
+        return view('admin.bookings.index', compact('bookings', 'stats', 'status', 'photographers', 'packages'));
     }
 
-    // Buat booking baru untuk pelanggan yang sudah punya akun
+    // Buat akun pelanggan baru sekaligus booking-nya
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id'         => ['required', Rule::exists('users', 'id')->where('role', 'customer')],
+            'name'            => ['required', 'string', 'max:255'],
+            'username'        => ['required', 'string', 'max:20', 'alpha_dash', 'unique:users,username'],
+            'email'           => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone'           => ['nullable', 'string', 'max:20'],
+            'password'        => ['required', 'string', 'min:8'],
             'photographer_id' => ['required', 'exists:photographers,id'],
             'package_id'      => ['required', 'exists:packages,id'],
             'booking_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:' . today()->addYears(2)->toDateString()],
             'start_time'      => ['required', 'date_format:H:i'],
             'lokasi'          => ['required', 'string', 'min:10', 'max:400'],
         ], [
-            'user_id.required'             => 'Pilih pelanggan terlebih dahulu.',
-            'user_id.exists'               => 'Pelanggan tidak ditemukan.',
+            'username.alpha_dash'          => 'Username hanya boleh huruf, angka, strip (-) dan garis bawah (_).',
+            'username.unique'              => 'Username sudah dipakai.',
+            'email.unique'                 => 'Email sudah terdaftar.',
+            'password.min'                 => 'Password minimal 8 karakter.',
             'lokasi.min'                   => 'Alamat terlalu singkat, tulis minimal 10 karakter (jalan, nomor, patokan).',
             'booking_date.after_or_equal'  => 'Tanggal booking tidak boleh sebelum hari ini.',
             'booking_date.before_or_equal' => 'Tanggal pelaksanaan maksimal 2 tahun dari sekarang.',
@@ -108,30 +114,32 @@ class BookingController extends Controller
             return back()->withErrors(['booking_date' => 'Tanggal/jam ini sudah dipesan pelanggan lain.'])->withInput();
         }
 
-        // Hindari pesanan ganda dari pelanggan yang sama di jam yang bertabrakan
-        $pesananGanda = Booking::where('user_id', $data['user_id'])
-            ->where('photographer_id', $photographer->id)
-            ->whereIn('status', ['pending', 'diterima', 'confirmed'])
-            ->overlap($data['booking_date'], $start, $end)
-            ->exists();
+        // Akun dan booking dibuat bersamaan: kalau salah satu gagal, keduanya dibatalkan
+        DB::transaction(function () use ($data, $photographer, $start, $end) {
+            $user = User::forceCreate([
+                'name'     => $data['name'],
+                'username' => $data['username'],
+                'email'    => $data['email'],
+                'phone'    => $data['phone'] ?? null,
+                'address'  => trim($data['lokasi']),
+                'role'     => 'customer',
+                'password' => Hash::make($data['password']),
+            ]);
 
-        if ($pesananGanda) {
-            return back()->withErrors(['booking_date' => 'Pelanggan ini sudah punya pesanan dengan fotografer yang sama di tanggal/jam yang bertabrakan.'])->withInput();
-        }
-
-        Booking::create([
-            'user_id'         => $data['user_id'],
-            'photographer_id' => $photographer->id,
-            'package_id'      => $data['package_id'],
-            'booking_date'    => $data['booking_date'],
-            'start_time'      => $start,
-            'end_time'        => $end,
-            'lokasi'          => trim($data['lokasi']),
-            'status'          => 'pending',
-        ]);
+            Booking::create([
+                'user_id'         => $user->id,
+                'photographer_id' => $photographer->id,
+                'package_id'      => $data['package_id'],
+                'booking_date'    => $data['booking_date'],
+                'start_time'      => $start,
+                'end_time'        => $end,
+                'lokasi'          => trim($data['lokasi']),
+                'status'          => 'pending',
+            ]);
+        });
 
         return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking berhasil dibuat (status: Menunggu).');
+            ->with('success', 'Akun pelanggan dan booking berhasil dibuat (status: Menunggu).');
     }
 
     public function updateStatus(Request $request, $id)
