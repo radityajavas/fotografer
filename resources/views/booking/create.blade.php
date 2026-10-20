@@ -1,19 +1,17 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pesan Fotografer</title>
+@extends('layouts.app')
+
+@section('content')
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --teal: #0f766e; --teal-dark: #0b5e57; }
         * { box-sizing: border-box; }
         body {
-            margin: 0; min-height: 100vh; padding: 32px 16px;
+            margin: 0; min-height: 100vh; 
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #1f2937;
             background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,.35)), url('{{ asset('images/foto.jpg') }}') center / cover fixed;
-            display: flex; justify-content: center; align-items: flex-start;
         }
+        
         .card {
             width: 100%; max-width: 546px; padding: 40px 48px; border-radius: 20px;
             background: linear-gradient(135deg, #a7e3cf 0%, #d9eec2 30%, #3f9a85 65%, #2d5a47 100%);
@@ -38,8 +36,7 @@
         .btn-cancel { background: #6b7280; color: #fff; }
         @media (max-width: 480px) { .card { padding: 28px 22px; } }
     </style>
-</head>
-<body>
+
 <div class="card">
     <h1>Pesan fotografer</h1>
 
@@ -169,5 +166,4 @@
     updateEnd();
     checkDate();
 </script>
-</body>
-</html>
+@endsection
