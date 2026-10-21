@@ -3,7 +3,6 @@
 @section('content')
 <div style="max-width: 1200px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif;">
     
-    <!-- Tombol Kembali ke Galeri -->
     <div style="margin-bottom: 20px;">
         <a href="{{ url('/galeri') }}" 
            style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #374151; border: 1px solid #e5e7eb; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;"
@@ -13,11 +12,9 @@
         </a>
     </div>
 
-    <!-- Header Profil Fotografer -->
     <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
         
         <div style="display: flex; align-items: center; gap: 20px;">
-            <!-- Lingkaran Avatar Inisial -->
             <div style="width: 70px; height: 70px; border-radius: 50%; background: #ccfbf1; color: #115e59; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; flex-shrink: 0;">
                 {{ strtoupper(substr($photographer->name ?? $photographer->nama, 0, 1)) }}
             </div>
@@ -46,7 +43,6 @@
         </div>
     </div>
 
-    <!-- Grid Hasil Foto Portofolio -->
     <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
         <h2 style="font-size: 18px; font-weight: bold; margin-top: 0; margin-bottom: 20px; color: #111;">Hasil Foto Portofolio</h2>
         

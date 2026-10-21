@@ -198,24 +198,29 @@
     </div>
 </div>
 
-{{-- isi galeri tiap fotografer, dipakai oleh popup --}}
 @foreach ($photographers as $item)
     @if ($item->photos->isNotEmpty())
         <template id="galeri-{{ $item->id }}">
-            <div class="row g-2">
-                @foreach ($item->photos as $p)
-                    <div class="col-6 col-md-4">
-                        <a href="{{ $p->url }}" target="_blank">
-                            <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
-                                 style="width:100%;height:180px;object-fit:cover;border-radius:6px">
-                        </a>
-                        @if ($p->kategori)
-                            <div class="small text-secondary mt-1">{{ $p->kategori }}</div>
-                        @endif
-                    </div>
-                @endforeach
+    <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: thin; width: 100%;">
+        @foreach ($item->photos as $p)
+            <div style="flex: 0 0 280px; width: 280px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div onclick="openModal('{{ $p->url }}')" style="cursor: pointer; position: relative; height: 260px; background: #f9fafb; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
+                         style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    
+                    @if ($p->kategori)
+                        <span style="position: absolute; top: 12px; left: 12px; background: rgba(17, 24, 39, 0.75); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 6px;">
+                            {{ $p->kategori }}
+                        </span>
+                    @endif
+                </div>
+                <div style="padding: 12px 16px; border-top: 1px solid #f3f4f6; font-size: 13px; font-weight: 600; color: #374151;">
+                    {{ $p->kategori ?: 'Portofolio' }}
+                </div>
             </div>
-        </template>
+        @endforeach
+    </div>
+</template>
     @endif
 @endforeach
 
@@ -232,6 +237,16 @@
             <div class="modal-body p-4" id="galeriIsi"></div>
         </div>
     </div>
+</div>
+
+<div id="imageModal" onclick="closeModal()" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 10600; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <button type="button" onclick="closeModal()" 
+            style="position: absolute; top: 20px; right: 25px; background: rgba(255,255,255,0.25); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; line-height: 1; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.4)'" 
+            onmouseout="this.style.background='rgba(255,255,255,0.25)'">
+        ✕
+    </button>
+    <img id="modalImg" src="" onclick="event.stopPropagation()" style="max-width: 90%; max-height: 85vh; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain;">
 </div>
 
 <script>
@@ -275,5 +290,13 @@
             if (e.key === 'Escape' && backdrop) tutup();
         });
     })();
+
+    function openModal(imgUrl) {
+        document.getElementById('modalImg').src = imgUrl;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
 </script>
 @endsection
