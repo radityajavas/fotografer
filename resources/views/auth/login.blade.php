@@ -27,14 +27,11 @@
       </div>
 
       <button type="submit" class="btn btn-brand w-100">Masuk</button>
-
-      @if (Route::has('password.request'))
-        <div class="mt-3"><a href="{{ route('password.request') }}">Lupa kata sandi?</a></div>
-      @endif
     </form>
 
     <p class="mt-3 mb-0">
-      Belum punya akun? <a href="{{ route('register') }}">Daftar</a>
+      Belum punya akun?
+      <a href="{{ route('register') }}" class="btn btn-brand btn-sm px-3 ms-1">Daftar</a>
     </p>
 
   </div>

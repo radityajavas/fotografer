@@ -1,23 +1,67 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    // Asal halaman: return_to (mekanisme baru) atau from (tautan lama).
+    // Hanya nilai yang dikenal yang dipakai, bukan URL mentah dari pengguna.
+    $returnTo = request('return_to') ?: request('from');
+    $returnTo = in_array($returnTo, ['booking', 'galeri'], true) ? $returnTo : null;
+
+    $packageId = request('package_id');
+
+    // Fallback aman: parameter asal hilang, tetapi halaman sebelumnya adalah form booking.
+    // Referer hanya dipakai untuk mendeteksi asal; URL tujuan tetap dibuat dari route bernama.
+    if (! $returnTo) {
+        $referer     = (string) request()->headers->get('referer');
+        $refererPath = (string) parse_url($referer, PHP_URL_PATH);
+
+        if ($refererPath !== '' && str_ends_with(rtrim($refererPath, '/'), '/booking/create')) {
+            $returnTo = 'booking';
+            $refererQuery = [];
+            parse_str((string) parse_url($referer, PHP_URL_QUERY), $refererQuery);
+            $packageId = $refererQuery['package_id'] ?? $packageId;
+        }
+    }
+
+    $packageId = is_scalar($packageId) && ctype_digit((string) $packageId)
+        ? (string) $packageId
+        : null;
+@endphp
 <div style="max-width: 1200px; margin: 0 auto; padding: 30px 20px; font-family: sans-serif;">
     
     <div style="margin-bottom: 20px;">
-        <a href="{{ url('/galeri') }}" 
-           style="display: inline-flex; align-items: center; gap: 8px; background: white; color: #374151; border: 1px solid #e5e7eb; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;"
-           onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db';" 
-           onmouseout="this.style.background='white'; this.style.borderColor='#e5e7eb';">
-            <span>&larr;</span> Kembali ke Galeri
-        </a>
+        @if ($returnTo === 'booking' && auth()->check())
+            {{-- Dibuka dari form booking: kembali ke form dengan fotografer (dan paket) yang sama --}}
+            <a href="{{ route('booking.create', array_filter([
+                    'photographer_id' => $photographer->id,
+                    'package_id'      => $packageId,
+                ])) }}"
+               class="btn btn-brand btn-sm px-3 d-inline-flex align-items-center gap-2">
+                <span>&larr;</span> Kembali ke Pemesanan
+            </a>
+        @elseif ($returnTo === 'galeri')
+            <a href="{{ route('galeri') }}" class="btn btn-brand-outline btn-sm px-3 d-inline-flex align-items-center gap-2">
+                <span>&larr;</span> Kembali ke Galeri
+            </a>
+        @else
+            <a href="{{ route('landing') }}" class="btn btn-brand-outline btn-sm px-3 d-inline-flex align-items-center gap-2">
+                <span>&larr;</span> Kembali ke Beranda
+            </a>
+        @endif
     </div>
 
     <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
         
         <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="width: 70px; height: 70px; border-radius: 50%; background: #ccfbf1; color: #115e59; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; flex-shrink: 0;">
-                {{ strtoupper(substr($photographer->name ?? $photographer->nama, 0, 1)) }}
-            </div>
+            @if ($photographer->photo)
+                <img src="{{ asset('storage/' . $photographer->photo) }}"
+                     alt="{{ $photographer->name }}"
+                     style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+            @else
+                <div style="width: 70px; height: 70px; border-radius: 50%; background: #ccfbf1; color: #115e59; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 24px; flex-shrink: 0;">
+                    {{ strtoupper(substr($photographer->name ?? $photographer->nama, 0, 1)) }}
+                </div>
+            @endif
             
             <div>
                 <h1 style="font-size: 22px; font-weight: bold; margin: 0; color: #111;">{{ $photographer->name ?? $photographer->nama }}</h1>
@@ -29,16 +73,26 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 24px; border-left: 1px solid #e5e7eb; padding-left: 24px;">
-            <div>
-                <p style="margin: 0; font-size: 12px; color: #9ca3af;">Spesialisasi</p>
-                <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #1f2937;">{{ $photographer->specialization ?? '-' }}</p>
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 24px; border-left: 1px solid #e5e7eb; padding-left: 24px;">
+                <div>
+                    <p style="margin: 0; font-size: 12px; color: #9ca3af;">Spesialisasi</p>
+                    <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #1f2937;">{{ $photographer->specialization ?? '-' }}</p>
+                </div>
+                <div>
+                    <p style="margin: 0; font-size: 12px; color: #9ca3af;">Status</p>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 4px;">
+                        {{ $photographer->status ?? 'AVAILABLE' }}
+                    </p>
+                </div>
             </div>
-            <div>
-                <p style="margin: 0; font-size: 12px; color: #9ca3af;">Status</p>
-                <p style="margin: 4px 0 0 0; font-size: 13px; font-weight: 600; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 4px;">
-                    {{ $photographer->status ?? 'AVAILABLE' }}
-                </p>
+
+            {{-- Aksi pelanggan: chat langsung ke percakapan, atau pesan fotografer ini --}}
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="{{ route('chat.start', ['photographer_id' => $photographer->id]) }}"
+                   class="btn btn-brand btn-sm px-3">Chat</a>
+                <a href="{{ route('booking.create', ['photographer_id' => $photographer->id]) }}"
+                   class="btn btn-brand-outline btn-sm px-3">Pesan</a>
             </div>
         </div>
     </div>
@@ -46,7 +100,7 @@
     <div style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
         <h2 style="font-size: 18px; font-weight: bold; margin-top: 0; margin-bottom: 20px; color: #111;">Hasil Foto Portofolio</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
             @forelse($photographer->photos as $photo)
                 <div onclick="openModal('{{ $photo->url }}')" 
                      style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.04); cursor: pointer; transition: transform 0.2s;"
@@ -75,7 +129,7 @@
 
                 </div>
             @empty
-                <div style="grid-column: span 3; text-align: center; padding: 40px; color: #9ca3af; font-size: 14px;">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #9ca3af; font-size: 14px;">
                     Belum ada hasil foto yang diunggah oleh fotografer ini.
                 </div>
             @endforelse

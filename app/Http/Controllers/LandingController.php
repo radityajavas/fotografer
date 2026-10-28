@@ -11,7 +11,6 @@ class LandingController extends Controller
     public function index()
     {
         return view('landing', [
-            'packages'      => Package::all(),
             'photographers' => Photographer::with(['photos' => fn($q) => $q->latest()])->get(),
             'categories'    => $this->categories(),
         ]);
@@ -22,6 +21,15 @@ class LandingController extends Controller
         $photographers = Photographer::with('photos')->latest()->get();
 
         return view('galeri', compact('photographers'));
+    }
+
+    // Halaman khusus daftar paket fotografi
+    public function packages()
+    {
+        return view('paket', [
+            'packages'      => Package::orderBy('price')->get(),
+            'photographers' => Photographer::orderBy('name')->get(),
+        ]);
     }
 
     public function cari(Request $request)
@@ -45,7 +53,6 @@ class LandingController extends Controller
         }
 
         return view('landing', [
-            'packages'      => Package::all(),
             'photographers' => $photographers->values(),
             'categories'    => $this->categories(),
         ]);

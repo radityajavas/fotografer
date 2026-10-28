@@ -4,7 +4,7 @@
 <div class="row justify-content-center">
   <div class="col-md-8 col-lg-6">
 
-    <a href="{{ route('bookings.my') }}" class="small">&larr; Kembali ke pesanan</a>
+    <a href="{{ route('landing') }}" class="btn btn-brand-outline btn-sm px-3 mb-2">&larr; Kembali ke Beranda</a>
     <h2 class="h4 mt-2 mb-1">Chat dengan admin</h2>
     <p class="text-secondary small">
       Pesanan: {{ $booking->photographer->name ?? '-' }} &bull; {{ $booking->package->name ?? '-' }}

@@ -29,6 +29,7 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/fotografer/cari', [LandingController::class, 'cari'])->name('fotografer.cari');
 
 Route::get('/galeri', [LandingController::class, 'gallery'])->name('galeri');
+Route::get('/paket', [LandingController::class, 'packages'])->name('paket.index');
 
 Route::get('/home', function () {
     return auth()->user()->role === 'admin' 
@@ -71,6 +72,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('chat.show');
     Route::post('/booking/{id}/chat', [ChatController::class, 'store'])
         ->name('chat.store');
+    // Tombol Chat di beranda: arahkan ke percakapan yang sesuai
+    Route::get('/chat', [ChatController::class, 'start'])
+        ->name('chat.start');
 });
 
 // 5. Admin (auth + admin)

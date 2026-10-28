@@ -18,7 +18,7 @@ class BookingController extends Controller
     public function create(Request $request)
     {
         $photographerId = $request->query('photographer_id');
-        $selectedPhotographer = Photographer::find($photographerId);
+        $selectedPhotographer = Photographer::with('photos')->find($photographerId);
 
         if (! $selectedPhotographer) {
             return redirect()->route('landing')->with('error', 'Fotografer tidak ditemukan.');
@@ -26,6 +26,20 @@ class BookingController extends Controller
 
         $packages = Package::orderBy('price')->get();
         $areas    = $selectedPhotographer->serviceAreas();
+
+        // Paket yang dibawa dari tombol "Pesan Sekarang" (atau dari input sebelumnya)
+        $selectedPackageId = $request->query('package_id', old('package_id'));
+
+        // Data paket untuk ringkasan di halaman booking (harga & durasi tetap dari database)
+        $packageData = $packages->mapWithKeys(fn ($p) => [
+            $p->id => [
+                'name'       => $p->name,
+                'price'      => (float) $p->price,
+                'price_label'=> 'Rp ' . number_format($p->price, 0, ',', '.'),
+                'duration'   => (int) $p->duration_hours,
+                'description'=> $p->description,
+            ],
+        ]);
 
         // Hanya libur SEHARIAN yang menonaktifkan tanggal di kalender
         $offDates = Schedule::where('photographer_id', $selectedPhotographer->id)
@@ -37,18 +51,46 @@ class BookingController extends Controller
             ->unique()
             ->values();
 
-        // Libur per jam (bukan seharian), dikelompokkan per tanggal: ['2026-10-10' => ['09:00–12:00', ...]]
-        $offBlocks = Schedule::where('photographer_id', $selectedPhotographer->id)
+        $schedules = Schedule::where('photographer_id', $selectedPhotographer->id)
             ->whereDate('date', '>=', today())
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->orderBy('date')
             ->orderBy('start_time')
-            ->get()
-            ->groupBy(fn ($s) => $s->date->format('Y-m-d'))
-            ->map(fn ($g) => $g->map(fn ($s) => $s->time_range)->values());
+            ->get();
 
-        return view('booking.create', compact('selectedPhotographer', 'packages', 'offDates', 'offBlocks', 'areas'));
+        // Libur per jam (bukan seharian) dikelompokkan per tanggal dalam format 24 jam.
+        // Dipakai JavaScript untuk menonaktifkan pilihan jam yang bertabrakan.
+        $offRanges = $schedules
+            ->groupBy(fn ($s) => $s->date->format('Y-m-d'))
+            ->map(fn ($g) => $g->map(fn ($s) => [
+                'start' => substr($s->start_time, 0, 5),
+                'end'   => substr($s->end_time, 0, 5),
+            ])->values());
+
+        // Jam yang sudah dipesan dan sudah diterima admin tidak boleh dipilih lagi
+        $bookedRanges = Booking::where('photographer_id', $selectedPhotographer->id)
+            ->whereIn('status', ['diterima', 'confirmed'])
+            ->whereDate('booking_date', '>=', today())
+            ->whereNotNull('start_time')
+            ->whereNotNull('end_time')
+            ->get()
+            ->groupBy(fn ($b) => \Carbon\Carbon::parse($b->booking_date)->format('Y-m-d'))
+            ->map(fn ($g) => $g->map(fn ($b) => [
+                'start' => substr($b->start_time, 0, 5),
+                'end'   => substr($b->end_time, 0, 5),
+            ])->values());
+
+        return view('booking.create', compact(
+            'selectedPhotographer',
+            'packages',
+            'packageData',
+            'selectedPackageId',
+            'offDates',
+            'offRanges',
+            'bookedRanges',
+            'areas'
+        ));
     }
 
     // Memproses simpan booking

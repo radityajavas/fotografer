@@ -47,6 +47,26 @@
             box-shadow: none;
         }
 
+        .btn-brand:focus-visible {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: #fff;
+            outline: 3px solid rgba(15, 118, 110, .35);
+            outline-offset: 2px;
+            box-shadow: none;
+        }
+
+        .btn-brand:disabled,
+        .btn-brand.disabled {
+            background: #9db8b4;
+            border-color: #9db8b4;
+            color: #fff;
+            opacity: 1;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
         .btn-brand-outline {
             background: transparent;
             color: var(--brand);
@@ -58,6 +78,14 @@
         .btn-brand-outline:hover {
             background: var(--brand);
             color: #fff;
+        }
+
+        .btn-brand-outline:focus-visible {
+            background: transparent;
+            color: var(--brand);
+            border-color: var(--brand);
+            outline: 3px solid rgba(15, 118, 110, .25);
+            outline-offset: 2px;
         }
 
         /* Header / Navbar Hijau */
@@ -309,6 +337,10 @@
                 <ul class="navbar-nav ms-md-4 me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">Beranda</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('paket.index') }}">Paket Fotografi</a>
                     </li>
 
                     <li class="nav-item">

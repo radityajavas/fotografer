@@ -3,16 +3,22 @@
 @section('content')
 <div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: sans-serif;">
     
+    <div style="margin-bottom: 20px;">
+        <a href="{{ route('landing') }}" class="btn btn-brand-outline btn-sm px-3 d-inline-flex align-items-center gap-2">
+            <span>&larr;</span> Kembali ke Beranda
+        </a>
+    </div>
+
     <!-- Judul Halaman -->
     <div style="margin-bottom: 30px; text-align: center;">
         <h1 style="font-size: 28px; font-weight: bold; color: #111; margin: 0;">Galeri Fotografer</h1>
         <p style="color: #6b7280; font-size: 14px; margin-top: 6px;">Jelajahi karya terbaik dari berbagai fotografer profesional.</p>
     </div>
 
-    <!-- Grid 3 Kolom Card Fotografer -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+    <!-- Grid card fotografer (responsif) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
         @forelse($photographers as $p)
-            <a href="{{ route('photographers.show', $p->id) }}" 
+            <a href="{{ route('photographers.show', ['id' => $p->id, 'return_to' => 'galeri']) }}"
                style="background: white; border-radius: 16px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-decoration: none; display: flex; flex-direction: column; transition: transform 0.2s;">
                 
                 <!-- Bagian Foto Sampul (Landscape proporsional) -->
@@ -52,7 +58,7 @@
 
             </a>
         @empty
-            <div style="grid-column: span 3; text-align: center; padding: 60px; background: white; border-radius: 16px; border: 1px solid #e5e7eb; color: #9ca3af;">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px; background: white; border-radius: 16px; border: 1px solid #e5e7eb; color: #9ca3af;">
                 Belum ada data fotografer.
             </div>
         @endforelse

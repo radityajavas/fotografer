@@ -41,7 +41,8 @@
     </form>
 
     <p class="mt-3 mb-0">
-      Sudah punya akun? <a href="{{ route('login') }}">Masuk</a>
+      Sudah punya akun?
+      <a href="{{ route('login') }}" class="btn btn-brand btn-sm px-3 ms-1">Masuk</a>
     </p>
 
   </div>

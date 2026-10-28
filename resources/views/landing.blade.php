@@ -112,7 +112,9 @@
                         @endphp
                         <tr>
                             <td class="ps-3 py-3">
-                                <div class="d-flex align-items-center gap-3">
+                                <a href="{{ route('photographers.show', $item->id) }}"
+                                   class="d-flex align-items-center gap-3 text-decoration-none"
+                                   title="Lihat profil {{ $item->name }}">
                                     @if ($foto)
                                         <img src="{{ asset('storage/' . $foto) }}" alt="{{ $item->name }}" class="avatar">
                                     @else
@@ -124,7 +126,7 @@
                                             {{ $item->phone }}@if ($item->city) &bull; {{ $item->city }}@endif
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </td>
 
                             <td>
@@ -140,7 +142,10 @@
                                     <span class="text-secondary small">Belum ada foto</span>
                                 @else
                                     <button type="button" class="border-0 bg-transparent p-0 d-flex align-items-center"
-                                            data-galeri="{{ $item->id }}" data-nama="{{ $item->name }}" data-info="{{ $info }}">
+                                            data-galeri="{{ $item->id }}" data-nama="{{ $item->name }}" data-info="{{ $info }}"
+                                            data-fotografer-id="{{ $item->id }}"
+                                            data-pesan="{{ route('booking.create', ['photographer_id' => $item->id]) }}"
+                                            data-foto="{{ $foto ? asset('storage/' . $foto) : '' }}">
                                         @foreach ($hasil as $p)
                                             <img src="{{ $p->url }}" alt="Hasil foto {{ $item->name }}"
                                                  style="width:48px;height:48px;object-fit:cover;border-radius:6px;margin-right:4px">
@@ -161,8 +166,11 @@
                             </td>
 
                             <td class="text-end pe-3" style="white-space:nowrap">
+                                <a href="{{ route('photographers.show', $item->id) }}"
+                                   class="btn btn-outline-secondary btn-sm px-3 py-1">Profil</a>
                                 @if ($item->status == 'AVAILABLE')
                                     <a href="{{ route('booking.create', ['photographer_id' => $item->id]) }}"
+                                       data-fotografer-id="{{ $item->id }}"
                                        class="btn btn-brand btn-sm px-3 py-1">Pesan</a>
                                 @else
                                     <button class="btn btn-outline-secondary btn-sm px-3 py-1" disabled>Pesan</button>
@@ -177,24 +185,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <!-- PAKET -->
-    <div class="row g-3 mb-4">
-        @foreach ($packages as $package)
-            <div class="col-md-4">
-                <div class="card p-3 h-100 border-0 shadow-sm" style="border-radius: 12px;">
-                    <h5 class="fw-bold text-dark">{{ $package->name }}</h5>
-                    <p class="fw-bold mb-1" style="color: #0d9488;">
-                        Rp {{ number_format($package->price, 0, ',', '.') }} 
-                        <span class="text-muted fw-normal small">({{ $package->duration_hours ?? 'Sesi' }} jam)</span>
-                    </p>
-                    <p class="card-text text-secondary small mb-0">
-                        <strong>DESKRIPSI:</strong> {{ $package->description }}
-                    </p>
-                </div>
-            </div>
-        @endforeach
     </div>
 </div>
 
@@ -228,16 +218,33 @@
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content border-0 shadow" style="border-radius: 12px;">
             <div class="modal-header border-0 pb-0">
-                <div>
-                    <h5 class="modal-title fw-bold" id="galeriJudul"></h5>
-                    <div class="small text-secondary" id="galeriInfo"></div>
+                <div class="d-flex align-items-center gap-3">
+                    <img id="galeriFoto" src="" alt="" style="display:none;width:48px;height:48px;object-fit:cover;border-radius:50%;">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="galeriJudul"></h5>
+                        <div class="small text-secondary" id="galeriInfo"></div>
+                    </div>
                 </div>
                 <button type="button" class="btn-close" data-tutup aria-label="Tutup"></button>
             </div>
             <div class="modal-body p-4" id="galeriIsi"></div>
+            <div class="modal-footer border-0 pt-0">
+                <span class="small text-secondary me-auto">Suka dengan hasil karyanya?</span>
+                <a href="#" id="galeriPesan" class="btn btn-brand btn-sm px-3">Pesan fotografer ini</a>
+            </div>
         </div>
     </div>
 </div>
+
+{{-- Tombol chat mengambang: akses cepat ke percakapan pesanan --}}
+<a href="{{ route('chat.start') }}"
+   class="btn btn-brand d-inline-flex align-items-center gap-2 rounded-pill"
+   style="position:fixed; right:20px; bottom:20px; z-index:1050; padding:12px 18px; font-weight:600; box-shadow:0 8px 20px rgba(15,118,110,.35);">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-5.2A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" />
+    </svg>
+    Chat
+</a>
 
 <div id="imageModal" onclick="closeModal()" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 10600; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
     <button type="button" onclick="closeModal()" 
@@ -260,6 +267,19 @@
             if (!tpl) return;
             document.getElementById('galeriJudul').textContent = btn.dataset.nama;
             document.getElementById('galeriInfo').textContent = btn.dataset.info || '';
+
+            // Foto profil & tombol pesan harus mengikuti fotografer yang dipilih
+            var foto = document.getElementById('galeriFoto');
+            if (btn.dataset.foto) {
+                foto.src = btn.dataset.foto;
+                foto.alt = btn.dataset.nama;
+                foto.style.display = 'inline-block';
+            } else {
+                foto.removeAttribute('src');
+                foto.style.display = 'none';
+            }
+            document.getElementById('galeriPesan').setAttribute('href', btn.dataset.pesan || '#');
+
             isi.innerHTML = '';
             isi.appendChild(tpl.content.cloneNode(true));
 
